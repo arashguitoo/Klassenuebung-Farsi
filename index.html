@@ -1,0 +1,2231 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>فارسی‌شهر — Prüfungsvorbereitung</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<style>
+/* ══ SHARED ══════════════════════════════════════ */
+.mode-lehrer,.mode-schueler{display:none}
+
+/* ══ LEHRER ══════════════════════════════════════ */
+:root{
+  --bg:#0F172A;--card:#1E293B;--card2:#273548;--border:#334155;
+  --teal:#0D9488;--teal2:#14B8A6;--amber:#F59E0B;--rose:#F43F5E;
+  --green:#22C55E;--blue:#3B82F6;--purple:#A855F7;
+  --text:#F1F5F9;--text2:#94A3B8;--text3:#64748B;
+  --radius:12px;--shadow:0 4px 20px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;min-height:100vh;overflow-x:hidden}
+.fa{font-family:'Vazirmatn',sans-serif;direction:rtl}
+
+/* ── HEADER ── */
+.header{background:var(--card);border-bottom:2px solid var(--border);padding:1rem 2rem;display:flex;align-items:center;gap:1.5rem;position:sticky;top:0;z-index:100}
+.header-title{font-size:1.25rem;font-weight:900;background:linear-gradient(90deg,var(--teal2),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header-subtitle{font-size:.8rem;color:var(--text2)}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:1rem}
+.live-badge{background:var(--rose);color:white;font-size:.72rem;font-weight:800;padding:3px 10px;border-radius:20px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.online-count{font-size:.85rem;color:var(--green);font-weight:700}
+.timer-display{font-size:1.4rem;font-weight:900;color:var(--amber);font-variant-numeric:tabular-nums;min-width:70px;text-align:center}
+
+/* ── PHASE NAV ── */
+.phase-nav{background:var(--card);border-bottom:1px solid var(--border);padding:.75rem 2rem;display:flex;gap:.5rem;overflow-x:auto}
+.phase-btn{padding:6px 14px;border:2px solid var(--border);border-radius:20px;background:transparent;color:var(--text2);cursor:pointer;font-size:.75rem;font-weight:700;font-family:'Nunito',sans-serif;white-space:nowrap;transition:.2s}
+.phase-btn.active{background:var(--teal);color:white;border-color:var(--teal)}
+.phase-btn.done{border-color:var(--green);color:var(--green)}
+
+/* ── MAIN ── */
+.main{max-width:1100px;margin:0 auto;padding:1.5rem 2rem 4rem}
+.phase-panel{display:none}.phase-panel.active{display:block}
+
+/* ── CARDS ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.25rem;box-shadow:var(--shadow)}
+.card-title{font-size:.75rem;font-weight:800;color:var(--teal2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.75rem}
+
+/* ── LESETEXT ── */
+.lesetext{font-family:'Vazirmatn',sans-serif;direction:rtl;text-align:right;line-height:2.1;font-size:1.2rem;color:var(--text);background:var(--card2);border-radius:var(--radius);padding:1.5rem 2rem;margin-bottom:1rem;border-right:4px solid var(--teal)}
+.lesetext .word{cursor:pointer;border-bottom:1px dashed var(--text3);transition:.15s}
+.lesetext .word:hover{color:var(--teal2);border-color:var(--teal2)}
+.tooltip{position:fixed;background:#1a2540;border:1px solid var(--teal);color:var(--teal2);padding:5px 12px;border-radius:8px;font-size:.85rem;font-weight:700;pointer-events:none;z-index:999;display:none}
+
+/* ── AUFGABEN ── */
+.aufgaben-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.aufgabe{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem}
+.aufgabe-q{font-size:.92rem;font-weight:700;margin-bottom:.75rem;color:var(--text)}
+.aufgabe-opts{display:flex;flex-direction:column;gap:6px}
+.opt-bar{display:flex;align-items:center;gap:10px;font-size:.82rem}
+.opt-label{font-family:'Vazirmatn',sans-serif;font-size:1rem;min-width:120px;direction:rtl;text-align:right}
+.opt-bar-fill{height:28px;border-radius:6px;background:linear-gradient(90deg,var(--teal),var(--blue));transition:width .6s;display:flex;align-items:center;padding:0 8px;font-size:.75rem;font-weight:800;color:white;min-width:32px}
+.opt-count{font-size:.78rem;color:var(--text2);min-width:28px}
+
+/* ── LÜCKENTEXT ── */
+.lueckentext{font-family:'Vazirmatn',sans-serif;direction:rtl;text-align:right;line-height:2.4;font-size:1.15rem;background:var(--card2);border-radius:var(--radius);padding:1.5rem 2rem}
+.blank{display:inline-block;min-width:90px;border-bottom:2px solid var(--amber);color:var(--amber);font-weight:700;padding:0 4px;text-align:center;margin:0 4px}
+.blank.correct{border-color:var(--green);color:var(--green)}
+.blank.revealed{border-color:var(--teal2);color:var(--teal2)}
+
+/* ── DIALOG MATCHING ── */
+.dialog-match-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.dialog-col{display:flex;flex-direction:column;gap:8px}
+.dialog-item{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-family:'Vazirmatn',sans-serif;direction:rtl;text-align:right;font-size:1rem;line-height:1.5}
+.dialog-item.matched{border-color:var(--green);background:rgba(34,197,94,.1)}
+.dialog-item .speaker{font-size:.7rem;font-weight:800;color:var(--teal2);font-family:'Nunito',sans-serif;direction:ltr;display:block;margin-bottom:3px}
+
+/* ── PAARBILDUNG ── */
+.paar-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.paar-item{background:var(--card2);border:2px solid var(--border);border-radius:10px;padding:10px 14px;text-align:center;cursor:pointer;transition:.2s;font-size:.92rem;font-weight:600}
+.paar-item:hover{border-color:var(--teal)}
+.paar-item.sel{border-color:var(--amber);background:rgba(245,158,11,.1)}
+.paar-item.mat{border-color:var(--green);background:rgba(34,197,94,.1);pointer-events:none}
+.paar-item.err{border-color:var(--rose);animation:shk .3s}
+@keyframes shk{0%,100%{transform:translateX(0)}33%{transform:translateX(-6px)}66%{transform:translateX(6px)}}
+
+/* ── LIVE RESULTS ── */
+.live-box{background:var(--card2);border:1px solid var(--green);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1rem}
+.live-header{display:flex;align-items:center;gap:8px;margin-bottom.75rem}
+.live-title{font-size:.78rem;font-weight:800;color:var(--green);text-transform:uppercase}
+.answers-list{display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto}
+.answer-item{display:flex;justify-content:space-between;align-items:center;background:var(--card);border-radius:8px;padding:6px 12px;font-size:.85rem}
+.answer-name{color:var(--text2);font-size:.78rem}
+.answer-text{font-family:'Vazirmatn',sans-serif;direction:rtl;color:var(--teal2);font-weight:700}
+.answer-correct{color:var(--green)}
+.answer-wrong{color:var(--rose)}
+
+/* ── AUSWERTUNG ── */
+.score-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.score-card{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center}
+.score-name{font-size:.82rem;color:var(--text2);margin-bottom:6px}
+.score-val{font-size:1.8rem;font-weight:900;color:var(--teal2)}
+.score-max{font-size:.75rem;color:var(--text3)}
+
+/* ── CONTROLS ── */
+.controls{display:flex;gap:10px;margin-top:1rem;flex-wrap:wrap}
+.btn{padding:9px 20px;border:none;border-radius:var(--radius);cursor:pointer;font-size:.85rem;font-weight:800;font-family:'Nunito',sans-serif;transition:.2s}
+.btn-primary{background:var(--teal);color:white}
+.btn-primary:hover{background:var(--teal2)}
+.btn-secondary{background:var(--card2);color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{border-color:var(--teal)}
+.btn-danger{background:var(--rose);color:white}
+.btn-amber{background:var(--amber);color:#1E293B}
+
+/* ── QR ── */
+.qr-box{text-align:center;padding:1rem}
+.qr-url{font-size:1.2rem;font-weight:900;color:var(--teal2);word-break:break-all;margin-bottom:.5rem}
+.qr-hint{font-size:.8rem;color:var(--text2)}
+#qr-canvas{border-radius:10px;margin:1rem auto;display:block;background:white;padding:10px}
+
+/* ── SPLIT VIEW ── */
+.split{display:grid;grid-template-columns:1.6fr 1fr;gap:1.25rem}
+
+/* ── PROGRESS ── */
+.phase-progress{display:flex;gap:4px;margin-bottom:1rem}
+.pp{height:6px;flex:1;background:var(--border);border-radius:3px}
+.pp.done{background:var(--green)}
+.pp.active{background:var(--teal);animation:glow 1.5s infinite}
+@keyframes glow{0%,100%{opacity:1}50%{opacity:.5}}
+
+/* ── STATS ROW ── */
+.stats-row{display:flex;gap:1rem;margin-bottom:1rem;flex-wrap:wrap}
+.stat{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;min-width:100px}
+.stat-val{font-size:1.5rem;font-weight:900;color:var(--teal2)}
+.stat-label{font-size:.72rem;color:var(--text2)}
+
+/* ── TOOLTIP ── */
+.tooltip{position:fixed;background:#0F2040;border:1px solid var(--teal);color:var(--teal2);padding:6px 14px;border-radius:8px;font-size:.88rem;font-weight:700;pointer-events:none;z-index:9999;white-space:nowrap;display:none}
+
+/* ══ SCHUELER ════════════════════════════════════ */
+:root{
+  --bg:#0F172A;--card:#1E293B;--card2:#273548;--border:#334155;
+  --teal:#0D9488;--teal2:#14B8A6;--amber:#F59E0B;--rose:#F43F5E;
+  --green:#22C55E;--purple:#A855F7;--blue:#3B82F6;
+  --text:#F1F5F9;--text2:#94A3B8;--text3:#64748B;
+  --radius:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;min-height:100vh;max-width:480px;margin:0 auto;padding:0 0 80px}
+.fa{font-family:'Vazirmatn',sans-serif;direction:rtl}
+/* JOIN */
+.join-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:2rem;text-align:center}
+.join-logo{font-size:3rem;margin-bottom:1rem}
+.join-title{font-size:1.5rem;font-weight:900;background:linear-gradient(90deg,var(--teal2),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.3rem}
+.join-subtitle{font-size:.85rem;color:var(--text2);margin-bottom:2rem}
+.join-form{width:100%;display:flex;flex-direction:column;gap:12px}
+.join-input{padding:14px 18px;border:2px solid var(--border);border-radius:var(--radius);background:var(--card);color:var(--text);font-family:'Nunito',sans-serif;font-size:1rem;width:100%;outline:none;transition:.2s}
+.join-input:focus{border-color:var(--teal)}
+.join-btn{padding:14px;border:none;border-radius:var(--radius);background:linear-gradient(135deg,var(--teal),var(--blue));color:white;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:800;cursor:pointer;transition:.2s}
+.join-btn:active{transform:scale(.97)}
+/* HEADER */
+.app-header{background:var(--card);border-bottom:1px solid var(--border);padding:.75rem 1.25rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.app-title{font-size:.9rem;font-weight:800;color:var(--teal2)}
+.app-name{font-size:.78rem;color:var(--text2)}
+.points-badge{background:var(--amber);color:#1E293B;font-size:.8rem;font-weight:900;padding:4px 12px;border-radius:20px}
+/* SCREENS */
+.screen{display:none;padding:1rem 1.25rem}
+.screen.active{display:block}
+/* WAITING */
+.waiting{text-align:center;padding:3rem 1rem}
+.waiting-icon{font-size:3rem;margin-bottom:1rem;animation:bounce 1.5s infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.waiting-text{font-size:1rem;font-weight:700;color:var(--text2)}
+/* TASK SCREEN */
+.task-title{font-size:.72rem;font-weight:800;color:var(--teal2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.75rem}
+.question-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem 1.25rem;margin-bottom:1rem}
+.question-text{font-size:.95rem;font-weight:700;margin-bottom:.85rem;line-height:1.4}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{padding:12px 16px;border:2px solid var(--border);border-radius:12px;background:var(--card2);color:var(--text);cursor:pointer;font-size:.9rem;font-family:'Nunito',sans-serif;font-weight:600;text-align:right;font-family:'Vazirmatn',sans-serif;direction:rtl;transition:.15s;-webkit-user-select:none}
+.opt.german{font-family:'Nunito',sans-serif;direction:ltr;text-align:left}
+.opt:active{transform:scale(.97)}
+.opt.sel{border-color:var(--teal);background:rgba(13,148,136,.2)}
+.opt.correct{border-color:var(--green)!important;background:rgba(34,197,94,.2)!important}
+.opt.wrong{border-color:var(--rose)!important;background:rgba(244,63,94,.2)!important}
+.opt.disabled{pointer-events:none}
+.feedback{text-align:center;padding:.5rem;font-weight:800;border-radius:10px;margin-top:.5rem;font-size:.9rem}
+.feedback.ok{background:rgba(34,197,94,.2);color:var(--green)}
+.feedback.no{background:rgba(244,63,94,.2);color:var(--rose)}
+/* FREE TEXT */
+.free-input{width:100%;padding:12px 14px;border:2px solid var(--border);border-radius:12px;background:var(--card2);color:var(--text);font-family:'Nunito',sans-serif;font-size:.9rem;resize:none;height:80px;outline:none}
+.free-input:focus{border-color:var(--teal)}
+/* LÜCKENTEXT */
+.luecken-text{font-family:'Vazirmatn',sans-serif;direction:rtl;text-align:right;line-height:2.5;font-size:1.1rem;background:var(--card2);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1rem}
+.word-bank{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1rem}
+.wb-word{padding:8px 14px;background:var(--card);border:2px solid var(--border);border-radius:10px;font-family:'Vazirmatn',sans-serif;font-size:1rem;cursor:pointer;transition:.15s}
+.wb-word:active{transform:scale(.95)}
+.wb-word.used{opacity:.3;pointer-events:none}
+.blank-slot{display:inline-block;min-width:80px;border-bottom:2px solid var(--amber);color:var(--amber);font-weight:700;padding:0 4px;margin:0 4px;cursor:pointer;text-align:center}
+.blank-slot.filled{border-color:var(--teal2);color:var(--teal2)}
+.blank-slot.correct{border-color:var(--green);color:var(--green)}
+.blank-slot.wrong{border-color:var(--rose);color:var(--rose)}
+/* DIALOG MATCH */
+.dial-list{display:flex;flex-direction:column;gap:8px}
+.dial-a{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:10px 14px;font-family:'Vazirmatn',sans-serif;direction:rtl;font-size:1rem;line-height:1.5}
+.dial-a .spk{font-size:.7rem;font-weight:800;color:var(--teal2);font-family:'Nunito',sans-serif;direction:ltr;display:block;margin-bottom:3px}
+.dial-b-opts{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+.dial-b-opt{padding:8px 12px;background:var(--card2);border:1px solid var(--border);border-radius:8px;font-family:'Vazirmatn',sans-serif;direction:rtl;font-size:.92rem;cursor:pointer;transition:.15s}
+.dial-b-opt:active{transform:scale(.97)}
+.dial-b-opt.sel{border-color:var(--teal);background:rgba(13,148,136,.2)}
+.dial-b-opt.correct{border-color:var(--green);background:rgba(34,197,94,.2)}
+.dial-b-opt.wrong{border-color:var(--rose);background:rgba(244,63,94,.2)}
+/* PAARBILDUNG */
+.paar-left,.paar-right{display:flex;flex-direction:column;gap:8px}
+.paar-section{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.p-item{padding:10px;border:2px solid var(--border);border-radius:10px;background:var(--card);text-align:center;cursor:pointer;font-size:.88rem;transition:.15s;-webkit-user-select:none}
+.p-item.fa-item{font-family:'Vazirmatn',sans-serif;font-size:1rem;direction:rtl}
+.p-item:active{transform:scale(.96)}
+.p-item.sel{border-color:var(--amber);background:rgba(245,158,11,.15)}
+.p-item.mat{border-color:var(--green);background:rgba(34,197,94,.1);pointer-events:none}
+.p-item.err{border-color:var(--rose);animation:shk .3s}
+@keyframes shk{0%,100%{transform:translateX(0)}33%{transform:translateX(-5px)}66%{transform:translateX(5px)}}
+/* SUBMIT BTN */
+.submit-btn{width:100%;padding:14px;border:none;border-radius:var(--radius);background:linear-gradient(135deg,var(--teal),var(--blue));color:white;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:800;cursor:pointer;margin-top:1rem}
+.submit-btn:active{transform:scale(.97)}
+.submit-btn:disabled{opacity:.5;pointer-events:none}
+/* SCORE */
+.score-screen{text-align:center;padding:2rem 1.25rem}
+.score-emoji{font-size:4rem;margin-bottom:1rem}
+.score-val{font-size:3rem;font-weight:900;color:var(--teal2);margin-bottom:.3rem}
+.score-label{font-size:.9rem;color:var(--text2)}
+.score-breakdown{background:var(--card);border-radius:var(--radius);padding:1rem;margin-top:1.5rem;text-align:left}
+.score-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:.85rem}
+.score-row:last-child{border-bottom:none}
+</style>
+</head>
+<body>
+
+<!-- ══ ROUTER ══════════════════════════════════════════ -->
+<div id="router-screen" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:#0F172A;padding:2rem;text-align:center">
+  <div style="font-size:3.5rem;margin-bottom:1rem">📚</div>
+  <div style="font-size:1.6rem;font-weight:900;background:linear-gradient(90deg,#14B8A6,#3B82F6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.4rem">فارسی‌شهر</div>
+  <div style="font-size:.9rem;color:#94A3B8;margin-bottom:2.5rem">Prüfungsvorbereitung</div>
+  <div style="display:flex;flex-direction:column;gap:14px;width:100%;max-width:360px">
+    <button onclick="startMode('lehrer')" style="padding:16px;border:none;border-radius:14px;background:linear-gradient(135deg,#0D9488,#3B82F6);color:white;font-family:Nunito,sans-serif;font-size:1.05rem;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px">
+      🖥️ Lehrkraft (Leinwand)
+    </button>
+    <button onclick="startMode('schueler')" style="padding:16px;border:none;border-radius:14px;background:linear-gradient(135deg,#7C3AED,#EC4899);color:white;font-family:Nunito,sans-serif;font-size:1.05rem;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px">
+      📱 Teilnehmer (Handy)
+    </button>
+  </div>
+  <div style="font-size:.75rem;color:#475569;margin-top:2rem">
+    URL mit <code style="color:#14B8A6">?mode=lehrer</code> oder <code style="color:#A855F7">?mode=schueler</code> öffnen um direkt zu starten
+  </div>
+</div>
+
+<!-- ══ LEHRER APP ════════════════════════════════════════ -->
+<div id="lehrer-app" class="mode-lehrer">
+<!-- TOOLTIP -->
+<div class="tooltip" id="tooltip"></div>
+
+<div class="header">
+  <div>
+    <div class="header-title">فارسی‌شهر — Prüfungsvorbereitung</div>
+    <div class="header-subtitle">90 Minuten · Stationen 1–14 · Live-Unterricht</div>
+  </div>
+  <div class="header-right">
+    <span class="live-badge">🔴 LIVE</span>
+    <span class="online-count" id="online-count">0 online</span>
+    <span class="timer-display" id="timer">90:00</span>
+    <button class="btn btn-amber" onclick="toggleTimer()" id="timer-btn">▶ Start</button>
+    <button class="btn btn-secondary" onclick="resetAll()">↺</button>
+  </div>
+</div>
+
+<div class="phase-nav" id="phase-nav">
+  <button class="phase-btn active" onclick="goPhase(0)">📋 Intro</button>
+  <button class="phase-btn" onclick="goPhase(1)">📖 Text 1 — Alltag</button>
+  <button class="phase-btn" onclick="goPhase(2)">❓ Aufgaben T1</button>
+  <button class="phase-btn" onclick="goPhase(3)">📖 Text 2 — Reise</button>
+  <button class="phase-btn" onclick="goPhase(4)">✏️ Lückentext T2</button>
+  <button class="phase-btn" onclick="goPhase(5)">💬 Dialog zuordnen</button>
+  <button class="phase-btn" onclick="goPhase(6)">📖 Text 3 — Zukunft</button>
+  <button class="phase-btn" onclick="goPhase(7)">❓ Aufgaben T3</button>
+  <button class="phase-btn" onclick="goPhase(8)">🔗 Paarbildung</button>
+  <button class="phase-btn" onclick="goPhase(9)">🏆 Auswertung</button>
+</div>
+
+<div class="main">
+
+<!-- PHASE 0: INTRO -->
+<div class="phase-panel active" id="phase-0">
+  <div class="split">
+    <div>
+      <div class="card">
+        <div class="card-title">📋 Ablauf der Prüfungsvorbereitung (90 Min.)</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;gap:12px;align-items:center;padding:8px 12px;background:var(--card2);border-radius:8px">
+            <span style="font-size:1.1rem;min-width:30px">📖</span>
+            <div><div style="font-weight:700;font-size:.88rem">Text 1 — Ein Tag im Alltag</div><div style="font-size:.76rem;color:var(--text2)">Gemeinsam lesen · MC + Richtig/Falsch · 15 Min.</div></div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;padding:8px 12px;background:var(--card2);border-radius:8px">
+            <span style="font-size:1.1rem;min-width:30px">✈️</span>
+            <div><div style="font-weight:700;font-size:.88rem">Text 2 — Eine Reise</div><div style="font-size:.76rem;color:var(--text2)">Gemeinsam lesen · Lückentext · 15 Min.</div></div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;padding:8px 12px;background:var(--card2);border-radius:8px">
+            <span style="font-size:1.1rem;min-width:30px">💬</span>
+            <div><div style="font-weight:700;font-size:.88rem">Dialog zuordnen</div><div style="font-size:.76rem;color:var(--text2)">Dialogzeilen zusammenbringen · 15 Min.</div></div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;padding:8px 12px;background:var(--card2);border-radius:8px">
+            <span style="font-size:1.1rem;min-width:30px">🔭</span>
+            <div><div style="font-weight:700;font-size:.88rem">Text 3 — Pläne & Zukunft</div><div style="font-size:.76rem;color:var(--text2)">Lesen + Aufgaben · freie Antworten · 15 Min.</div></div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;padding:8px 12px;background:var(--card2);border-radius:8px">
+            <span style="font-size:1.1rem;min-width:30px">🔗</span>
+            <div><div style="font-weight:700;font-size:.88rem">Paarbildung Vokabeln</div><div style="font-size:.76rem;color:var(--text2)">Wortschatz aus Stationen 1–14 · 10 Min.</div></div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;padding:8px 12px;background:var(--card2);border-radius:8px">
+            <span style="font-size:1.1rem;min-width:30px">🏆</span>
+            <div><div style="font-weight:700;font-size:.88rem">Auswertung & Punkte</div><div style="font-size:.76rem;color:var(--text2)">Rangliste · Statistik · 10 Min.</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="controls">
+        <button class="btn btn-primary" onclick="goPhase(1)">Weiter → Text 1</button>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="card-title">📱 Studis einladen</div>
+        <div class="qr-box">
+          <div class="qr-url" id="student-url">Wird geladen...</div>
+          <canvas id="qr-canvas" width="180" height="180"></canvas>
+          <div class="qr-hint">QR-Code scannen oder URL eintippen</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">👥 Online</div>
+        <div id="students-list" style="display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto">
+          <div style="color:var(--text3);font-size:.85rem">Noch niemand verbunden...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PHASE 1: TEXT 1 -->
+<div class="phase-panel" id="phase-1">
+  <div class="card">
+    <div class="card-title">📖 Text 1 — یک روز معمولی (Ein gewöhnlicher Tag)</div>
+    <div style="font-size:.78rem;color:var(--text2);margin-bottom:.75rem">Lesen Sie gemeinsam. Klicken Sie auf markierte Wörter für die Übersetzung.</div>
+    <div class="lesetext" id="text1">
+<span class="word" data-tr="Danial / Name">دانیال</span> هر روز صبح ساعت هفت <span class="word" data-tr="aufwachen">بیدار می‌شود</span>. بعد از اینکه صبحانه <span class="word" data-tr="essen">خورد</span>، با <span class="word" data-tr="Bus">اتوبوس</span> به <span class="word" data-tr="Universität">دانشگاه</span> می‌رود. او <span class="word" data-tr="Ingenieur/Student der Ingenieurwissenschaften">مهندسی</span> می‌خواند. وقتی <span class="word" data-tr="Vorlesungen">کلاس‌ها</span> تمام می‌شوند، به <span class="word" data-tr="Bibliothek">کتابخانه</span> می‌رود و <span class="word" data-tr="lernen / studieren">درس می‌خواند</span>.
+
+بعد از ظهر، اگر <span class="word" data-tr="Zeit">وقت</span> داشته باشد، با <span class="word" data-tr="Freunde">دوستانش</span> <span class="word" data-tr="Fußball spielen">فوتبال بازی می‌کند</span>. او <span class="word" data-tr="Sport">ورزش</span> را دوست دارد چون برایش <span class="word" data-tr="entspannend / wohltuend">آرامش‌بخش</span> است. شب‌ها خانواده‌اش با هم <span class="word" data-tr="zu Abend essen">شام می‌خورند</span>. <span class="word" data-tr="Mutter">مادرش</span> <span class="word" data-tr="sehr gut / ausgezeichnet">خیلی خوب</span> آشپزی می‌کند.
+
+دانیال فکر می‌کند که زندگی <span class="word" data-tr="einfach / unkompliziert">ساده</span> اما <span class="word" data-tr="angenehm / schön">دلپذیر</span> است. او هرگز <span class="word" data-tr="sich beschweren">شکایت نمی‌کند</span>.
+    </div>
+    <div class="controls">
+      <button class="btn btn-primary" onclick="startTask('t1mc'); goPhase(2)">→ Aufgaben freigeben</button>
+      <button class="btn btn-secondary" onclick="goPhase(0)">← Zurück</button>
+    </div>
+  </div>
+</div>
+
+<!-- PHASE 2: AUFGABEN T1 -->
+<div class="phase-panel" id="phase-2">
+  <div class="split">
+    <div>
+      <div class="card">
+        <div class="card-title">❓ Aufgaben zu Text 1 — Live-Ergebnisse</div>
+        <div id="t1-results">
+          <div style="color:var(--text3);font-size:.85rem;text-align:center;padding:2rem">Warte auf Antworten...</div>
+        </div>
+      </div>
+      <div class="controls">
+        <button class="btn btn-primary" onclick="revealAnswers('t1mc')">✓ Antworten zeigen</button>
+        <button class="btn btn-secondary" onclick="goPhase(3)">→ Text 2</button>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="card-title">📊 Statistik</div>
+        <div class="stats-row">
+          <div class="stat"><div class="stat-val" id="t1-answered">0</div><div class="stat-label">geantwortet</div></div>
+          <div class="stat"><div class="stat-val" id="t1-correct">0</div><div class="stat-label">richtig</div></div>
+          <div class="stat"><div class="stat-val" id="t1-pct">0%</div><div class="stat-label">Ø Prozent</div></div>
+        </div>
+        <div id="t1-live-answers" style="display:flex;flex-direction:column;gap:5px;max-height:300px;overflow-y:auto"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PHASE 3: TEXT 2 -->
+<div class="phase-panel" id="phase-3">
+  <div class="card">
+    <div class="card-title">📖 Text 2 — سفر به اصفهان (Eine Reise nach Isfahan)</div>
+    <div style="font-size:.78rem;color:var(--text2);margin-bottom:.75rem">Lesen Sie gemeinsam. Klicken Sie auf markierte Wörter für die Übersetzung.</div>
+    <div class="lesetext" id="text2">
+پارسال تابستان با <span class="word" data-tr="Familie">خانواده‌ام</span> به <span class="word" data-tr="Isfahan (Stadt in Iran)">اصفهان</span> <span class="word" data-tr="reisen / fahren">سفر کردیم</span>. قبل از اینکه <span class="word" data-tr="abreisen / losfahren">حرکت کنیم</span>، مادرم <span class="word" data-tr="vorbereiten / packen">همه چیز را آماده کرده بود</span>. با <span class="word" data-tr="Zug">قطار</span> رفتیم چون <span class="word" data-tr="billiger">ارزان‌تر</span> بود.
+
+وقتی به اصفهان <span class="word" data-tr="ankommen">رسیدیم</span>، اول به <span class="word" data-tr="Naqsh-e Jahan Platz (berühmtester Platz Irans)">میدان نقش جهان</span> رفتیم. این میدان <span class="word" data-tr="der/die/das größte">بزرگ‌ترین</span> میدان <span class="word" data-tr="historisch / geschichtlich">تاریخی</span> ایران است. <span class="word" data-tr="dort / an diesem Ort">آنجا</span> عکس‌های زیادی <span class="word" data-tr="aufnehmen / machen (Fotos)">گرفتیم</span>. بعد از اینکه <span class="word" data-tr="zu Mittag essen">ناهار خوردیم</span>، به <span class="word" data-tr="Basar / Markt">بازار</span> رفتیم.
+
+اگرچه <span class="word" data-tr="müde">خسته</span> بودیم، با این حال <span class="word" data-tr="glücklich / fröhlich">خوشحال</span> بودیم. این <span class="word" data-tr="Reise">سفر</span> <span class="word" data-tr="der/die/das beste">بهترین</span> <span class="word" data-tr="Erinnerung">خاطره</span> تابستانم شد.
+    </div>
+    <div class="controls">
+      <button class="btn btn-primary" onclick="startTask('t2lc'); goPhase(4)">→ Lückentext freigeben</button>
+      <button class="btn btn-secondary" onclick="goPhase(2)">← Zurück</button>
+    </div>
+  </div>
+</div>
+
+<!-- PHASE 4: LÜCKENTEXT T2 -->
+<div class="phase-panel" id="phase-4">
+  <div class="split">
+    <div>
+      <div class="card">
+        <div class="card-title">✏️ Lückentext — Lösungen</div>
+        <div class="lueckentext" id="luecken-display">
+          پارسال تابستان با خانواده‌ام به اصفهان سفر کردیم. قبل از اینکه حرکت کنیم، مادرم همه چیز را آماده کرده بود. با قطار رفتیم چون
+          <span class="blank" id="blank-0" data-answer="ارزان‌تر">_____</span>
+          بود. وقتی به اصفهان رسیدیم، اول به میدان نقش جهان رفتیم. این میدان
+          <span class="blank" id="blank-1" data-answer="بزرگ‌ترین">_____</span>
+          میدان تاریخی ایران است. بعد از اینکه ناهار خوردیم، به
+          <span class="blank" id="blank-2" data-answer="بازار">_____</span>
+          رفتیم. اگرچه خسته بودیم،
+          <span class="blank" id="blank-3" data-answer="خوشحال">_____</span>
+          بودیم.
+        </div>
+        <div style="margin-top:1rem">
+          <div style="font-size:.78rem;color:var(--text2);margin-bottom:.5rem">Wortbank (auf Handy):</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <span style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-family:'Vazirmatn',sans-serif">ارزان‌تر</span>
+            <span style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-family:'Vazirmatn',sans-serif">بزرگ‌ترین</span>
+            <span style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-family:'Vazirmatn',sans-serif">بازار</span>
+            <span style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-family:'Vazirmatn',sans-serif">خوشحال</span>
+            <span style="background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-family:'Vazirmatn',sans-serif">خسته</span>
+          </div>
+        </div>
+        <div class="controls">
+          <button class="btn btn-primary" onclick="revealBlanks()">✓ Lösungen zeigen</button>
+          <button class="btn btn-secondary" onclick="goPhase(5)">→ Dialog</button>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="card-title">📊 Live-Eingaben</div>
+        <div id="t2-live" style="display:flex;flex-direction:column;gap:5px;max-height:350px;overflow-y:auto">
+          <div style="color:var(--text3);font-size:.85rem">Warte auf Antworten...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PHASE 5: DIALOG -->
+<div class="phase-panel" id="phase-5">
+  <div class="card">
+    <div class="card-title">💬 Dialog zuordnen — Am Bahnhof</div>
+    <div style="font-size:.78rem;color:var(--text2);margin-bottom:1rem">Studis ordnen auf dem Handy zu. Ergebnisse erscheinen hier live.</div>
+    <div class="split">
+      <div>
+        <div style="font-size:.78rem;color:var(--teal2);font-weight:700;margin-bottom:.5rem">FRAGEN / AUSSAGEN (A)</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div class="dialog-item" id="da-0"><span class="speaker">A :</span>ببخشید، بلیط تهران کجا می‌فروشند؟</div>
+          <div class="dialog-item" id="da-1"><span class="speaker">A :</span>قطار ساعت چند حرکت می‌کند؟</div>
+          <div class="dialog-item" id="da-2"><span class="speaker">A :</span>آیا جای نشستن پیدا می‌شود؟</div>
+          <div class="dialog-item" id="da-3"><span class="speaker">A :</span>قیمت بلیط چقدر است؟</div>
+          <div class="dialog-item" id="da-4"><span class="speaker">A :</span>ممنون از کمکتان.</div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:.78rem;color:var(--amber);font-weight:700;margin-bottom:.5rem">ANTWORTEN (B)</div>
+        <div style="display:flex;flex-direction:column;gap:8px" id="dialog-b-col">
+          <div class="dialog-item" id="db-0"><span class="speaker">B :</span>گیشه شماره سه، سمت چپ.</div>
+          <div class="dialog-item" id="db-1"><span class="speaker">B :</span>ساعت ده و نیم.</div>
+          <div class="dialog-item" id="db-2"><span class="speaker">B :</span>بله، چند تا جای خالی مانده.</span></div>
+          <div class="dialog-item" id="db-3"><span class="speaker">B :</span>صد و پنجاه هزار تومان.</div>
+          <div class="dialog-item" id="db-4"><span class="speaker">B :</span>خواهش می‌کنم. سفر خوشی داشته باشید!</div>
+        </div>
+      </div>
+    </div>
+    <div id="dialog-results" style="margin-top:1rem;display:flex;flex-direction:column;gap:5px;max-height:200px;overflow-y:auto"></div>
+    <div class="controls">
+      <button class="btn btn-primary" onclick="revealDialog()">✓ Lösung zeigen</button>
+      <button class="btn btn-secondary" onclick="goPhase(6)">→ Text 3</button>
+    </div>
+  </div>
+</div>
+
+<!-- PHASE 6: TEXT 3 -->
+<div class="phase-panel" id="phase-6">
+  <div class="card">
+    <div class="card-title">📖 Text 3 — برنامه‌های آینده (Zukunftspläne)</div>
+    <div style="font-size:.78rem;color:var(--text2);margin-bottom:.75rem">Lesen Sie gemeinsam. Klicken Sie auf markierte Wörter für die Übersetzung.</div>
+    <div class="lesetext" id="text3">
+<span class="word" data-tr="Niloufar / Name">نیلوفر</span> دانشجوی سال آخر است. بعد از <span class="word" data-tr="Abschluss / Graduierung">فارغ‌التحصیلی</span>، می‌خواهد به <span class="word" data-tr="Ausland">خارج از کشور</span> برود. او احتمالاً در <span class="word" data-tr="Deutschland">آلمان</span> <span class="word" data-tr="sich anmelden / einschreiben">ثبت‌نام خواهد کرد</span> چون آلمانی <span class="word" data-tr="schon vorher / bereits früher">از قبل</span> خوانده است.
+
+قبل از اینکه برود، می‌خواهد با خانواده‌اش <span class="word" data-tr="Abschiedsreise / gemeinsame Reise">سفر کند</span>. او به <span class="word" data-tr="Norden (des Landes)">شمال</span> می‌خواهد برود — <span class="word" data-tr="weil / da">چون</span> دریا را دوست دارد. مادرش <span class="word" data-tr="Sorgen machen">نگران</span> است، اما نیلوفر گفته که <span class="word" data-tr="telefonieren / anrufen">هر روز زنگ خواهد زد</span>.
+
+در آینده، نیلوفر <span class="word" data-tr="hoffen / wünschen">امیدوار</span> است که یک <span class="word" data-tr="Arbeit / Stelle">کار خوب</span> پیدا کند و روزی به ایران <span class="word" data-tr="zurückkehren">برگردد</span>. او هرگز <span class="word" data-tr="vergessen">فراموش نخواهد کرد</span> که <span class="word" data-tr="Heimat / Geburtsland">وطنش</span> کجاست.
+    </div>
+    <div class="controls">
+      <button class="btn btn-primary" onclick="startTask('t3q'); goPhase(7)">→ Aufgaben freigeben</button>
+      <button class="btn btn-secondary" onclick="goPhase(5)">← Zurück</button>
+    </div>
+  </div>
+</div>
+
+<!-- PHASE 7: AUFGABEN T3 -->
+<div class="phase-panel" id="phase-7">
+  <div class="split">
+    <div>
+      <div class="card">
+        <div class="card-title">❓ Aufgaben zu Text 3</div>
+        <div id="t3-results">
+          <div style="color:var(--text3);font-size:.85rem;text-align:center;padding:2rem">Warte auf Antworten...</div>
+        </div>
+      </div>
+      <div class="controls">
+        <button class="btn btn-primary" onclick="revealAnswers('t3q')">✓ Antworten zeigen</button>
+        <button class="btn btn-secondary" onclick="goPhase(8)">→ Paarbildung</button>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="card-title">💬 Freie Antworten</div>
+        <div id="t3-free-answers" style="display:flex;flex-direction:column;gap:5px;max-height:350px;overflow-y:auto">
+          <div style="color:var(--text3);font-size:.85rem">Warte auf Antworten...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PHASE 8: PAARBILDUNG -->
+<div class="phase-panel" id="phase-8">
+  <div class="card">
+    <div class="card-title">🔗 Paarbildung — Vokabeln aus dem Lernpfad</div>
+    <div style="font-size:.78rem;color:var(--text2);margin-bottom:1rem">Studis ordnen auf dem Handy zu. Ergebnisse erscheinen live.</div>
+    <div class="paar-grid" id="paar-lehrer">
+      <!-- Generated by JS -->
+    </div>
+    <div id="paar-live" style="margin-top:1rem;display:flex;flex-direction:column;gap:5px;max-height:200px;overflow-y:auto"></div>
+    <div class="controls">
+      <button class="btn btn-primary" onclick="revealPaar()">✓ Lösung zeigen</button>
+      <button class="btn btn-secondary" onclick="goPhase(9)">→ Auswertung</button>
+    </div>
+  </div>
+</div>
+
+<!-- PHASE 9: AUSWERTUNG -->
+<div class="phase-panel" id="phase-9">
+  <div class="card">
+    <div class="card-title">🏆 Auswertung & Rangliste</div>
+    <div class="score-grid" id="score-grid">
+      <div style="color:var(--text3);font-size:.85rem;grid-column:1/-1;text-align:center;padding:2rem">Lade Ergebnisse...</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">📊 Gesamtstatistik</div>
+    <div class="stats-row" id="final-stats"></div>
+  </div>
+  <div class="controls">
+    <button class="btn btn-primary" onclick="exportResults()">📥 Ergebnisse exportieren</button>
+    <button class="btn btn-danger" onclick="resetAll()">↺ Neue Runde</button>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<script>
+// ── FIREBASE ──
+const SESSION = 'pruef_' + Date.now().toString(36).slice(-4);
+const ref = (p) => db.ref('pruefung/' + SESSION + '/' + p);
+
+// ── TIMER ──
+var timerSec = 90*60, timerRunning = false, timerInterval;
+function toggleTimer(){
+  if(timerRunning){ clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').textContent='▶ Start'; }
+  else { timerInterval=setInterval(tickTimer,1000); timerRunning=true; document.getElementById('timer-btn').textContent='⏸ Pause'; }
+}
+function tickTimer(){
+  if(timerSec<=0){clearInterval(timerInterval);return;}
+  timerSec--;
+  var m=Math.floor(timerSec/60), s=timerSec%60;
+  document.getElementById('timer').textContent=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+  if(timerSec===0) document.getElementById('timer').style.color='var(--rose)';
+}
+
+// ── PHASES ──
+var currentPhase=0;
+function goPhase(n){
+  document.querySelectorAll('.phase-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('phase-'+n).classList.add('active');
+  document.querySelectorAll('.phase-btn').forEach((b,i)=>{
+    b.classList.remove('active','done');
+    if(i===n) b.classList.add('active');
+    else if(i<n) b.classList.add('done');
+  });
+  currentPhase=n;
+  if(n===9) loadScores();
+}
+
+// ── TOOLTIP ──
+document.querySelectorAll('.word').forEach(function(w){
+  w.addEventListener('mouseenter',function(e){
+    var t=document.getElementById('tooltip');
+    t.textContent=w.dataset.tr;
+    t.style.display='block';
+    t.style.left=(e.clientX+12)+'px';
+    t.style.top=(e.clientY-30)+'px';
+  });
+  w.addEventListener('mousemove',function(e){
+    var t=document.getElementById('tooltip');
+    t.style.left=(e.clientX+12)+'px';
+    t.style.top=(e.clientY-30)+'px';
+  });
+  w.addEventListener('mouseleave',function(){
+    document.getElementById('tooltip').style.display='none';
+  });
+});
+
+// ── TASK DATA ──
+var TASKS = {
+  t1mc: {
+    type: 'mc',
+    questions: [
+      {q:'Wie fährt Danial zur Universität?', opts:['با ماشین','با اتوبوس','با مترو','پیاده'], ans:1},
+      {q:'Was macht Danial in der Bibliothek?', opts:['موسیقی گوش می‌دهد','با دوستان صحبت می‌کند','درس می‌خواند','کتاب می‌خرد'], ans:2},
+      {q:'Richtig oder Falsch: Danial spielt abends Fußball.', opts:['Richtig','Falsch'], ans:1},
+      {q:'Richtig oder Falsch: Danial liebt Sport.', opts:['Richtig','Falsch'], ans:0},
+      {q:'Was denkt Danial über sein Leben?', opts:['Es ist schwer','Es ist einfach aber angenehm','Es ist langweilig','Es ist perfekt'], ans:1},
+    ]
+  },
+  t3q: {
+    type: 'mixed',
+    questions: [
+      {q:'Wohin will Niloufar nach dem Studium?', opts:['به فرانسه','به انگلستان','به آلمان','به ایتالیا'], ans:2},
+      {q:'Warum hat Niloufar Deutsch gelernt?', opts:['Für die Universität','Um auszuwandern','Aus Interesse','Weil es einfach ist'], ans:1},
+      {q:'Richtig oder Falsch: Niloufar will mit Freunden reisen.', opts:['Richtig','Falsch'], ans:1},
+      {q:'Welches Ziel hat Niloufar nach dem Auslandsstudium?', opts:['In Deutschland bleiben','Nach Iran zurückkehren','Andere Länder besuchen','Promovieren'], ans:1},
+      {q:'Freie Antwort: Was würden Sie an Niloufars Stelle machen?', type:'free'},
+    ]
+  }
+};
+
+var currentTask = null;
+var taskAnswers = {}; // {name: {q0:x, q1:x, ...}}
+var taskListeners = {};
+
+function startTask(taskId){
+  currentTask = taskId;
+  taskAnswers = {};
+  ref('task').set({id:taskId, active:true, ts:Date.now()});
+  // Listen for answers
+  if(taskListeners[taskId]) ref('answers/'+taskId).off();
+  taskListeners[taskId] = ref('answers/'+taskId).on('value', snap=>{
+    taskAnswers = snap.val() || {};
+    updateTaskResults(taskId);
+  });
+}
+
+function updateTaskResults(taskId){
+  var task = TASKS[taskId];
+  if(!task) return;
+  var el = document.getElementById(taskId==='t1mc'?'t1-results':'t3-results');
+  var liveEl = document.getElementById(taskId==='t1mc'?'t1-live-answers':'t3-free-answers');
+  if(!el) return;
+
+  var students = Object.keys(taskAnswers);
+  var nQ = task.questions.length;
+  var html = '';
+  task.questions.forEach(function(q,qi){
+    if(q.type==='free') return;
+    // Count votes per option
+    var counts = new Array(q.opts.length).fill(0);
+    var total = 0;
+    students.forEach(function(s){
+      var ans = taskAnswers[s];
+      if(ans && ans['q'+qi] !== undefined){
+        counts[ans['q'+qi]]++;
+        total++;
+      }
+    });
+    html += '<div style="margin-bottom:1rem">';
+    html += '<div style="font-size:.82rem;font-weight:700;margin-bottom:.4rem;color:var(--text)">'+(qi+1)+'. '+q.q+'</div>';
+    q.opts.forEach(function(o,oi){
+      var pct = total>0?Math.round(counts[oi]/total*100):0;
+      var isCorrect = oi===q.ans;
+      var barColor = isCorrect?'var(--green)':'var(--teal)';
+      html += '<div class="opt-bar">';
+      html += '<div class="opt-label fa">'+o+'</div>';
+      html += '<div style="flex:1;background:var(--card2);border-radius:6px;overflow:hidden;height:24px">';
+      html += '<div style="height:100%;background:'+barColor+';width:'+pct+'%;transition:width .6s;display:flex;align-items:center;padding:0 6px;font-size:.75rem;font-weight:800;color:white;min-width:'+(pct>0?'32px':'0')+'">'+(pct>0?pct+'%':'')+'</div>';
+      html += '</div>';
+      html += '<div class="opt-count">'+counts[oi]+'</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  });
+  el.innerHTML = html || '<div style="color:var(--text3);font-size:.85rem;text-align:center;padding:2rem">Warte auf Antworten...</div>';
+
+  // Stats
+  var correct=0, answered=0;
+  students.forEach(function(s){
+    var ans = taskAnswers[s];
+    if(!ans) return;
+    task.questions.forEach(function(q,qi){
+      if(q.type==='free') return;
+      if(ans['q'+qi]!==undefined){
+        answered++;
+        if(ans['q'+qi]===q.ans) correct++;
+      }
+    });
+  });
+  var nNonFree = task.questions.filter(q=>q.type!=='free').length;
+  var nAnswered = students.filter(s=>taskAnswers[s]).length;
+  if(document.getElementById('t1-answered')) document.getElementById('t1-answered').textContent=nAnswered;
+  if(document.getElementById('t1-correct')) document.getElementById('t1-correct').textContent=correct;
+  if(document.getElementById('t1-pct')) document.getElementById('t1-pct').textContent=(answered>0?Math.round(correct/answered*100):0)+'%';
+
+  // Free answers
+  if(liveEl){
+    var freeHtml='';
+    students.forEach(function(s){
+      var ans=taskAnswers[s];
+      if(ans&&ans.free){
+        freeHtml+='<div class="answer-item"><span class="answer-name">'+s+'</span><span class="answer-text">'+ans.free+'</span></div>';
+      }
+    });
+    liveEl.innerHTML=freeHtml||'<div style="color:var(--text3);font-size:.85rem">Keine freien Antworten bisher.</div>';
+  }
+}
+
+function revealAnswers(taskId){
+  ref('reveal/'+taskId).set(true);
+}
+
+// ── LÜCKENTEXT ──
+function revealBlanks(){
+  document.querySelectorAll('.blank').forEach(function(b){
+    b.textContent=b.dataset.answer;
+    b.classList.add('revealed');
+  });
+  ref('reveal/t2lc').set(true);
+}
+
+// ── DIALOG ──
+var DIALOG_CORRECT = [0,1,2,3,4]; // B[i] matches A[i]
+function revealDialog(){
+  document.querySelectorAll('.dialog-item[id^="da-"]').forEach(function(el,i){
+    el.classList.add('matched');
+  });
+  document.querySelectorAll('.dialog-item[id^="db-"]').forEach(function(el,i){
+    el.classList.add('matched');
+  });
+  ref('reveal/dialog').set(true);
+}
+
+// Watch dialog answers
+ref('answers/dialog').on('value', function(snap){
+  var ans = snap.val()||{};
+  var el = document.getElementById('dialog-results');
+  if(!el) return;
+  var html='';
+  Object.keys(ans).forEach(function(name){
+    var a=ans[name];
+    html+='<div class="answer-item"><span class="answer-name">'+name+'</span><span class="answer-text">'+JSON.stringify(a)+'</span></div>';
+  });
+  el.innerHTML=html;
+});
+
+// ── PAARBILDUNG ──
+var PAAR_DATA = [
+  {fa:'رفتن',de:'gehen / fahren'},
+  {fa:'بودن',de:'sein'},
+  {fa:'داشتن',de:'haben'},
+  {fa:'خواندن',de:'lesen / studieren'},
+  {fa:'گفتن',de:'sagen'},
+  {fa:'دیدن',de:'sehen'},
+  {fa:'خوردن',de:'essen'},
+  {fa:'آمدن',de:'kommen'},
+  {fa:'بزرگ‌تر',de:'größer'},
+  {fa:'بهترین',de:'der/die/das Beste'},
+  {fa:'فردا',de:'morgen'},
+  {fa:'قبل از اینکه',de:'bevor / ehe'},
+];
+
+// Show on lehrer screen
+(function buildPaar(){
+  var el=document.getElementById('paar-lehrer');
+  if(!el) return;
+  var shuffled=PAAR_DATA.slice().sort(()=>Math.random()-.5);
+  var html='';
+  shuffled.forEach(function(p,i){
+    html+='<div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center">';
+    html+='<span style="font-family:Vazirmatn,sans-serif;font-size:1.05rem;direction:rtl">'+p.fa+'</span>';
+    html+='<span style="color:var(--text2);font-size:.85rem">'+p.de+'</span>';
+    html+='</div>';
+  });
+  el.innerHTML=html;
+})();
+
+function revealPaar(){
+  ref('reveal/paar').set(true);
+}
+
+ref('answers/paar').on('value', function(snap){
+  var ans=snap.val()||{};
+  var el=document.getElementById('paar-live');
+  if(!el) return;
+  var html='';
+  Object.keys(ans).forEach(function(name){
+    var a=ans[name];
+    var score=a.score||0;
+    html+='<div class="answer-item"><span class="answer-name">'+name+'</span><span class="answer-correct">'+score+' / '+PAAR_DATA.length+' richtig</span></div>';
+  });
+  el.innerHTML=html||'<div style="color:var(--text3);font-size:.85rem">Warte auf Antworten...</div>';
+});
+
+// ── STUDENTS ONLINE ──
+ref('students').on('value', function(snap){
+  var students=snap.val()||{};
+  var names=Object.keys(students).filter(k=>students[k]&&students[k].online);
+  document.getElementById('online-count').textContent=names.length+' online';
+  var el=document.getElementById('students-list');
+  if(!el) return;
+  if(names.length===0){
+    el.innerHTML='<div style="color:var(--text3);font-size:.85rem">Noch niemand verbunden...</div>';
+    return;
+  }
+  el.innerHTML=names.map(n=>'<div style="display:flex;align-items:center;gap:8px;padding:5px 8px;background:var(--card2);border-radius:7px"><span style="color:var(--green);font-size:.7rem">●</span><span style="font-size:.85rem">'+n+'</span></div>').join('');
+});
+
+// ── SCORES ──
+function loadScores(){
+  ref('scores').once('value').then(function(snap){
+    var scores=snap.val()||{};
+    var el=document.getElementById('score-grid');
+    var sorted=Object.keys(scores).sort((a,b)=>(scores[b].total||0)-(scores[a].total||0));
+    if(sorted.length===0){
+      el.innerHTML='<div style="color:var(--text3);font-size:.85rem;grid-column:1/-1;text-align:center;padding:2rem">Keine Daten</div>';
+      return;
+    }
+    var medals=['🥇','🥈','🥉'];
+    el.innerHTML=sorted.map((n,i)=>'<div class="score-card"><div class="score-name">'+(medals[i]||'')+(i+1)+'. '+n+'</div><div class="score-val">'+(scores[n].total||0)+'</div><div class="score-max">Punkte</div></div>').join('');
+    var total=sorted.reduce((s,n)=>s+(scores[n].total||0),0);
+    document.getElementById('final-stats').innerHTML=
+      '<div class="stat"><div class="stat-val">'+sorted.length+'</div><div class="stat-label">Teilnehmer</div></div>'+
+      '<div class="stat"><div class="stat-val">'+Math.round(total/sorted.length||0)+'</div><div class="stat-label">Ø Punkte</div></div>';
+  });
+}
+
+function exportResults(){
+  ref('scores').once('value').then(function(snap){
+    var d=snap.val()||{};
+    var csv='Name,Punkte\n'+Object.keys(d).sort((a,b)=>(d[b].total||0)-(d[a].total||0)).map(n=>n+','+(d[n].total||0)).join('\n');
+    var a=document.createElement('a');
+    a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+    a.download='pruefung_ergebnisse.csv';
+    a.click();
+  });
+}
+
+function resetAll(){
+  if(!confirm('Alle Daten löschen und neue Runde starten?')) return;
+  ref('').remove();
+  timerSec=90*60;
+  clearInterval(timerInterval);
+  timerRunning=false;
+  document.getElementById('timer').textContent='90:00';
+  document.getElementById('timer').style.color='var(--amber)';
+  document.getElementById('timer-btn').textContent='▶ Start';
+  goPhase(0);
+}
+
+// ── QR CODE (simple) ──
+function drawQR(){
+  var url = location.href.replace('lehrer','schueler').replace('pruefungsvorbereitung_lehrer','pruefungsvorbereitung_schueler')+'?session='+SESSION;
+  document.getElementById('student-url').textContent = url;
+  // Simple QR via external (no external dep version: just show URL)
+  var c=document.getElementById('qr-canvas');
+  var ctx=c.getContext('2d');
+  ctx.fillStyle='white';ctx.fillRect(0,0,180,180);
+  ctx.fillStyle='#0F2040';ctx.font='11px Nunito,sans-serif';ctx.textAlign='center';
+  ctx.fillText('Bitte URL eingeben:', 90, 40);
+  // Write session ID large
+  ctx.fillStyle='#0D9488';ctx.font='bold 22px Nunito,sans-serif';
+  ctx.fillText(SESSION, 90, 90);
+  ctx.fillStyle='#0F2040';ctx.font='10px Nunito,sans-serif';
+  ctx.fillText('Session-Code', 90, 120);
+}
+drawQR();
+
+// Write session to firebase
+ref('meta').set({started:Date.now(), session:SESSION});
+</script>
+</div>
+
+<!-- ══ SCHUELER APP ══════════════════════════════════════ -->
+<div id="schueler-app" class="mode-schueler">
+<!-- JOIN SCREEN -->
+<div class="join-screen" id="join-screen">
+  <div class="join-logo">📚</div>
+  <div class="join-title">فارسی‌شهر</div>
+  <div class="join-subtitle">Prüfungsvorbereitung — Teilnehmer-App</div>
+  <div class="join-form">
+    <input class="join-input" id="session-input" placeholder="Session-Code (z.B. abc1)" maxlength="8">
+    <input class="join-input" id="name-input" placeholder="Dein Name" maxlength="20">
+    <button class="join-btn" onclick="joinSession()">Eintreten →</button>
+  </div>
+</div>
+
+<!-- APP (hidden until joined) -->
+<div id="app" style="display:none">
+  <div class="app-header">
+    <div>
+      <div class="app-title">فارسی‌شهر · Prüfungsvorbereitung</div>
+      <div class="app-name" id="app-name"></div>
+    </div>
+    <div class="points-badge" id="points-badge">0 Pkt</div>
+  </div>
+
+  <!-- WAITING -->
+  <div class="screen active" id="screen-wait">
+    <div class="waiting">
+      <div class="waiting-icon">⏳</div>
+      <div class="waiting-text">Warte auf die Lehrkraft...</div>
+      <div style="font-size:.78rem;color:var(--text3);margin-top:.5rem">Die nächste Aufgabe erscheint automatisch</div>
+    </div>
+  </div>
+
+  <!-- MC / RF QUIZ -->
+  <div class="screen" id="screen-mc">
+    <div class="task-title" id="mc-task-title">Aufgaben — Text 1</div>
+    <div id="mc-questions"></div>
+    <button class="submit-btn" id="mc-submit" onclick="submitMC()">Antworten abschicken ✓</button>
+  </div>
+
+  <!-- LÜCKENTEXT -->
+  <div class="screen" id="screen-lueck">
+    <div class="task-title">Lückentext — Text 2</div>
+    <div class="luecken-text" id="lueck-text">
+      پارسال تابستان با خانواده‌ام به اصفهان سفر کردیم. قبل از اینکه حرکت کنیم، مادرم همه چیز را آماده کرده بود. با قطار رفتیم چون
+      <span class="blank-slot" id="bs0" data-answer="ارزان‌تر" onclick="fillBlank(0)">_____</span>
+      بود. وقتی به اصفهان رسیدیم، اول به میدان نقش جهان رفتیم. این میدان
+      <span class="blank-slot" id="bs1" data-answer="بزرگ‌ترین" onclick="fillBlank(1)">_____</span>
+      میدان تاریخی ایران است. بعد از اینکه ناهار خوردیم، به
+      <span class="blank-slot" id="bs2" data-answer="بازار" onclick="fillBlank(2)">_____</span>
+      رفتیم. اگرچه خسته بودیم،
+      <span class="blank-slot" id="bs3" data-answer="خوشحال" onclick="fillBlank(3)">_____</span>
+      بودیم.
+    </div>
+    <div style="font-size:.78rem;color:var(--text2);margin-bottom:.5rem">Wortbank — tippe auf ein Wort, dann auf die Lücke:</div>
+    <div class="word-bank" id="word-bank">
+      <span class="wb-word" data-word="ارزان‌تر" onclick="selectWord(this)">ارزان‌تر</span>
+      <span class="wb-word" data-word="بزرگ‌ترین" onclick="selectWord(this)">بزرگ‌ترین</span>
+      <span class="wb-word" data-word="بازار" onclick="selectWord(this)">بازار</span>
+      <span class="wb-word" data-word="خوشحال" onclick="selectWord(this)">خوشحال</span>
+      <span class="wb-word" data-word="خسته" onclick="selectWord(this)">خسته</span>
+    </div>
+    <button class="submit-btn" id="lueck-submit" onclick="submitLueck()">Lückentext abschicken ✓</button>
+  </div>
+
+  <!-- DIALOG -->
+  <div class="screen" id="screen-dialog">
+    <div class="task-title">Dialog zuordnen — Am Bahnhof</div>
+    <div style="font-size:.78rem;color:var(--text2);margin-bottom:.75rem">Wähle die passende Antwort (B) für jede Aussage (A).</div>
+    <div class="dial-list" id="dialog-questions"></div>
+    <button class="submit-btn" id="dialog-submit" onclick="submitDialog()">Dialog abschicken ✓</button>
+  </div>
+
+  <!-- T3 AUFGABEN -->
+  <div class="screen" id="screen-t3">
+    <div class="task-title">Aufgaben — Text 3</div>
+    <div id="t3-questions"></div>
+    <button class="submit-btn" id="t3-submit" onclick="submitT3()">Antworten abschicken ✓</button>
+  </div>
+
+  <!-- PAARBILDUNG -->
+  <div class="screen" id="screen-paar">
+    <div class="task-title">Paarbildung — Verbinde Persisch mit Deutsch</div>
+    <div style="font-size:.78rem;color:var(--text2);margin-bottom:.75rem">Tippe auf ein persisches Wort, dann auf die deutsche Bedeutung.</div>
+    <div style="margin-bottom:.5rem;font-size:.82rem;font-weight:700;color:var(--teal2)">Paare: <span id="paar-done">0</span> / <span id="paar-total">0</span></div>
+    <div class="paar-section" id="paar-section"></div>
+    <button class="submit-btn" id="paar-submit" onclick="submitPaar()" disabled>Paarbildung abschicken ✓</button>
+  </div>
+
+  <!-- ERGEBNIS -->
+  <div class="screen" id="screen-result">
+    <div class="score-screen">
+      <div class="score-emoji" id="result-emoji">🎉</div>
+      <div class="score-val" id="result-score">0</div>
+      <div class="score-label">Punkte insgesamt</div>
+      <div class="score-breakdown" id="result-breakdown"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+var SESSION='', MYNAME='', MYPOINTS=0;
+var SCORES={};
+var lueckSelected=null;
+var lueckFilled={};
+var paarSel=null, paarMatched=0;
+var PAAR_PAIRS=[];
+
+// ── URL param ──
+var urlParams=new URLSearchParams(location.search);
+if(urlParams.get('session')) document.getElementById('session-input').value=urlParams.get('session');
+
+function ref(p){return db.ref('pruefung/'+SESSION+'/'+p);}
+
+function joinSession(){
+  var sess=document.getElementById('session-input').value.trim();
+  var name=document.getElementById('name-input').value.trim();
+  if(!sess||!name){alert('Bitte Session-Code und Name eingeben.');return;}
+  SESSION=sess; MYNAME=name;
+  document.getElementById('join-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('app-name').textContent=name;
+  // Register online
+  var presRef=ref('students/'+name);
+  presRef.set({online:true,joined:Date.now()});
+  presRef.onDisconnect().set({online:false});
+  // Listen for task
+  ref('task').on('value',onTask);
+  // Listen for reveals
+  ref('reveal').on('value',onReveal);
+  showScreen('wait');
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+}
+
+function addPoints(n){
+  MYPOINTS+=n;
+  document.getElementById('points-badge').textContent=MYPOINTS+' Pkt';
+  ref('scores/'+MYNAME).set({total:MYPOINTS});
+}
+
+// ── TASK DISPATCH ──
+var lastTask=null;
+function onTask(snap){
+  var t=snap.val();
+  if(!t||!t.active) return;
+  if(t.id===lastTask) return;
+  lastTask=t.id;
+  if(t.id==='t1mc') buildMCScreen('t1mc','Aufgaben — Text 1');
+  else if(t.id==='t2lc') showScreen('lueck');
+  else if(t.id==='t2dialog') buildDialogScreen();
+  else if(t.id==='t3q') buildT3Screen();
+  else if(t.id==='paar') buildPaarScreen();
+}
+
+// ── REVEAL ──
+function onReveal(snap){
+  var r=snap.val()||{};
+  if(r.t1mc) revealMCAnswers('t1mc');
+  if(r.t2lc) revealLuecken();
+  if(r.dialog) revealDialogAnswers();
+  if(r.t3q) revealMCAnswers('t3q');
+  if(r.paar) revealPaarAnswers();
+}
+
+// ── MC ──
+var MC_TASKS={
+  t1mc:{
+    title:'Aufgaben — Text 1',
+    questions:[
+      {q:'Wie fährt Danial zur Universität?',opts:['با ماشین','با اتوبوس','با مترو','پیاده'],ans:1,fa:true},
+      {q:'Was macht Danial in der Bibliothek?',opts:['موسیقی گوش می‌دهد','با دوستان صحبت می‌کند','درس می‌خواند','کتاب می‌خرد'],ans:2,fa:true},
+      {q:'Richtig oder Falsch: Danial spielt abends Fußball.',opts:['Richtig ✓','Falsch ✗'],ans:1,fa:false},
+      {q:'Richtig oder Falsch: Danial liebt Sport.',opts:['Richtig ✓','Falsch ✗'],ans:0,fa:false},
+      {q:'Was denkt Danial über sein Leben?',opts:['Es ist schwer','Es ist einfach aber angenehm','Es ist langweilig','Es ist perfekt'],ans:1,fa:false},
+    ]
+  },
+  t3q:{
+    title:'Aufgaben — Text 3',
+    questions:[
+      {q:'Wohin will Niloufar nach dem Studium?',opts:['به فرانسه','به انگلستان','به آلمان','به ایتالیا'],ans:2,fa:true},
+      {q:'Richtig oder Falsch: Niloufar will mit Freunden reisen.',opts:['Richtig ✓','Falsch ✗'],ans:1,fa:false},
+      {q:'Welches Ziel hat Niloufar nach dem Ausland?',opts:['In Deutschland bleiben','Nach Iran zurückkehren','Andere Länder','Promovieren'],ans:1,fa:false},
+      {q:'Freie Antwort: Was würden Sie an Niloufars Stelle machen? (auf Persisch)',type:'free'},
+    ]
+  }
+};
+
+var mcAnswers={};
+function buildMCScreen(taskId, title){
+  var task=MC_TASKS[taskId];
+  if(!task) return;
+  document.getElementById('mc-task-title').textContent=task.title;
+  var html='';
+  task.questions.forEach(function(q,qi){
+    html+='<div class="question-card" id="qc'+qi+'">';
+    html+='<div class="question-text">'+(qi+1)+'. '+q.q+'</div>';
+    if(q.type==='free'){
+      html+='<textarea class="free-input" id="free-'+qi+'" placeholder="Schreib deine Antwort auf Persisch..."></textarea>';
+    } else {
+      html+='<div class="opts">';
+      q.opts.forEach(function(o,oi){
+        var cls=q.fa?'opt':'opt german';
+        html+='<div class="'+cls+'" id="opt-'+qi+'-'+oi+'" onclick="selectOpt('+qi+','+oi+',\''+taskId+'\')">'+o+'</div>';
+      });
+      html+='</div>';
+    }
+    html+='</div>';
+  });
+  document.getElementById('mc-questions').innerHTML=html;
+  document.getElementById('mc-submit').dataset.task=taskId;
+  mcAnswers={};
+  showScreen('mc');
+}
+
+function selectOpt(qi,oi,taskId){
+  var task=MC_TASKS[taskId];
+  if(!task) return;
+  var q=task.questions[qi];
+  if(q.type==='free') return;
+  // Deselect others
+  var nOpts=q.opts.length;
+  for(var i=0;i<nOpts;i++){
+    var el=document.getElementById('opt-'+qi+'-'+i);
+    if(el) el.classList.remove('sel');
+  }
+  var el=document.getElementById('opt-'+qi+'-'+oi);
+  if(el) el.classList.add('sel');
+  mcAnswers['q'+qi]=oi;
+}
+
+function submitMC(){
+  var taskId=document.getElementById('mc-submit').dataset.task||'t1mc';
+  var task=MC_TASKS[taskId];
+  // Add free answers
+  task.questions.forEach(function(q,qi){
+    if(q.type==='free'){
+      var el=document.getElementById('free-'+qi);
+      if(el) mcAnswers.free=el.value;
+    }
+  });
+  ref('answers/'+taskId+'/'+MYNAME).set(mcAnswers);
+  // Local feedback
+  var correct=0;
+  task.questions.forEach(function(q,qi){
+    if(q.type==='free') return;
+    var ans=mcAnswers['q'+qi];
+    if(ans===undefined) return;
+    var correct_opt=document.getElementById('opt-'+qi+'-'+q.ans);
+    var sel_opt=document.getElementById('opt-'+qi+'-'+ans);
+    if(correct_opt) correct_opt.classList.add('correct','disabled');
+    if(sel_opt&&ans!==q.ans) sel_opt.classList.add('wrong');
+    if(ans===q.ans) correct++;
+  });
+  document.getElementById('mc-submit').disabled=true;
+  addPoints(correct*2);
+  showScreen('wait');
+}
+
+function revealMCAnswers(taskId){
+  // Already handled locally in submitMC
+}
+
+// ── LÜCKENTEXT ──
+function selectWord(el){
+  document.querySelectorAll('.wb-word').forEach(w=>w.style.borderColor='');
+  lueckSelected=el.dataset.word;
+  el.style.borderColor='var(--amber)';
+}
+
+function fillBlank(i){
+  if(!lueckSelected) return;
+  var slot=document.getElementById('bs'+i);
+  if(slot.classList.contains('filled')) return;
+  // Remove from word bank
+  document.querySelectorAll('.wb-word').forEach(function(w){
+    if(w.dataset.word===lueckSelected) w.classList.add('used');
+  });
+  slot.textContent=lueckSelected;
+  slot.classList.add('filled');
+  lueckFilled[i]=lueckSelected;
+  lueckSelected=null;
+  document.querySelectorAll('.wb-word').forEach(w=>w.style.borderColor='');
+  // Check if all filled
+  if(Object.keys(lueckFilled).length>=4) document.getElementById('lueck-submit').disabled=false;
+}
+
+function submitLueck(){
+  ref('answers/t2lc/'+MYNAME).set(lueckFilled);
+  var correct=0;
+  for(var i=0;i<4;i++){
+    var slot=document.getElementById('bs'+i);
+    if(!slot) continue;
+    if(lueckFilled[i]===slot.dataset.answer){ slot.classList.add('correct'); correct++; }
+    else slot.classList.add('wrong');
+  }
+  document.getElementById('lueck-submit').disabled=true;
+  addPoints(correct*2);
+  showScreen('wait');
+}
+
+function revealLuecken(){
+  for(var i=0;i<4;i++){
+    var s=document.getElementById('bs'+i);
+    if(s&&!s.classList.contains('filled')){
+      s.textContent=s.dataset.answer;
+      s.classList.add('filled');
+    }
+  }
+}
+
+// ── DIALOG ──
+var DIALOG_A=[
+  'ببخشید، بلیط تهران کجا می‌فروشند؟',
+  'قطار ساعت چند حرکت می‌کند؟',
+  'آیا جای نشستن پیدا می‌شود؟',
+  'قیمت بلیط چقدر است؟',
+  'ممنون از کمکتان.',
+];
+var DIALOG_B=[
+  'گیشه شماره سه، سمت چپ.',
+  'ساعت ده و نیم.',
+  'بله، چند تا جای خالی مانده.',
+  'صد و پنجاه هزار تومان.',
+  'خواهش می‌کنم. سفر خوشی داشته باشید!',
+];
+var DIALOG_CORRECT=[0,1,2,3,4];
+var dialogAnswers={};
+
+function buildDialogScreen(){
+  var html='';
+  DIALOG_A.forEach(function(a,i){
+    html+='<div class="dial-a" style="margin-bottom:10px">';
+    html+='<span class="spk">A '+(i+1)+':</span>'+a;
+    html+='<div class="dial-b-opts">';
+    // Shuffle B options
+    var bIdx=[0,1,2,3,4].sort(()=>Math.random()-.5);
+    bIdx.forEach(function(j){
+      html+='<div class="dial-b-opt" id="db-'+i+'-'+j+'" onclick="selectDialogB('+i+','+j+')">'+DIALOG_B[j]+'</div>';
+    });
+    html+='</div></div>';
+  });
+  document.getElementById('dialog-questions').innerHTML=html;
+  dialogAnswers={};
+  showScreen('dialog');
+}
+
+function selectDialogB(qi,oi){
+  // Deselect previous for this qi
+  document.querySelectorAll('[id^="db-'+qi+'-"]').forEach(function(el){el.classList.remove('sel');});
+  document.getElementById('db-'+qi+'-'+oi).classList.add('sel');
+  dialogAnswers[qi]=oi;
+  if(Object.keys(dialogAnswers).length>=5) document.getElementById('dialog-submit').disabled=false;
+}
+
+function submitDialog(){
+  ref('answers/dialog/'+MYNAME).set(dialogAnswers);
+  var correct=0;
+  Object.keys(dialogAnswers).forEach(function(qi){
+    var oi=dialogAnswers[qi];
+    var el=document.getElementById('db-'+qi+'-'+oi);
+    if(oi===DIALOG_CORRECT[parseInt(qi)]){ if(el){el.classList.add('correct');} correct++; }
+    else if(el) el.classList.add('wrong');
+    // Show correct
+    var cel=document.getElementById('db-'+qi+'-'+DIALOG_CORRECT[parseInt(qi)]);
+    if(cel) cel.classList.add('correct');
+  });
+  document.getElementById('dialog-submit').disabled=true;
+  addPoints(correct*2);
+  showScreen('wait');
+}
+
+function revealDialogAnswers(){
+  DIALOG_CORRECT.forEach(function(j,i){
+    var el=document.getElementById('db-'+i+'-'+j);
+    if(el) el.classList.add('correct');
+  });
+}
+
+// ── T3 ──
+function buildT3Screen(){
+  var task=MC_TASKS['t3q'];
+  var html='';
+  task.questions.forEach(function(q,qi){
+    html+='<div class="question-card" id="t3qc'+qi+'">';
+    html+='<div class="question-text">'+(qi+1)+'. '+q.q+'</div>';
+    if(q.type==='free'){
+      html+='<textarea class="free-input" id="t3free-'+qi+'" placeholder="Schreib auf Persisch..."></textarea>';
+    } else {
+      html+='<div class="opts">';
+      q.opts.forEach(function(o,oi){
+        var cls=q.fa?'opt':'opt german';
+        html+='<div class="'+cls+'" id="t3opt-'+qi+'-'+oi+'" onclick="selectT3Opt('+qi+','+oi+')">'+o+'</div>';
+      });
+      html+='</div>';
+    }
+    html+='</div>';
+  });
+  document.getElementById('t3-questions').innerHTML=html;
+  mcAnswers={};
+  showScreen('t3');
+}
+
+function selectT3Opt(qi,oi){
+  var task=MC_TASKS['t3q'];
+  var q=task.questions[qi];
+  var nOpts=q.opts.length;
+  for(var i=0;i<nOpts;i++){
+    var el=document.getElementById('t3opt-'+qi+'-'+i);
+    if(el) el.classList.remove('sel');
+  }
+  var el=document.getElementById('t3opt-'+qi+'-'+oi);
+  if(el) el.classList.add('sel');
+  mcAnswers['q'+qi]=oi;
+}
+
+function submitT3(){
+  var task=MC_TASKS['t3q'];
+  task.questions.forEach(function(q,qi){
+    if(q.type==='free'){
+      var el=document.getElementById('t3free-'+qi);
+      if(el) mcAnswers.free=el.value;
+    }
+  });
+  ref('answers/t3q/'+MYNAME).set(mcAnswers);
+  var correct=0;
+  task.questions.forEach(function(q,qi){
+    if(q.type==='free') return;
+    var ans=mcAnswers['q'+qi];
+    if(ans===undefined) return;
+    var correct_opt=document.getElementById('t3opt-'+qi+'-'+q.ans);
+    var sel_opt=document.getElementById('t3opt-'+qi+'-'+ans);
+    if(correct_opt) correct_opt.classList.add('correct','disabled');
+    if(sel_opt&&ans!==q.ans) sel_opt.classList.add('wrong');
+    if(ans===q.ans) correct++;
+  });
+  document.getElementById('t3-submit').disabled=true;
+  addPoints(correct*2);
+  showScreen('wait');
+}
+
+// ── PAARBILDUNG ──
+var PAAR_DATA=[
+  {fa:'رفتن',de:'gehen / fahren'},
+  {fa:'بودن',de:'sein'},
+  {fa:'داشتن',de:'haben'},
+  {fa:'خواندن',de:'lesen / studieren'},
+  {fa:'گفتن',de:'sagen'},
+  {fa:'دیدن',de:'sehen'},
+  {fa:'خوردن',de:'essen'},
+  {fa:'آمدن',de:'kommen'},
+  {fa:'بزرگ‌تر',de:'größer'},
+  {fa:'بهترین',de:'der/die/das Beste'},
+  {fa:'فردا',de:'morgen'},
+  {fa:'خسته',de:'müde'},
+];
+
+function buildPaarScreen(){
+  PAAR_PAIRS=PAAR_DATA.slice(0,8); // 8 pairs
+  var leftItems=PAAR_PAIRS.map((p,i)=>({text:p.fa,idx:i,side:'fa'})).sort(()=>Math.random()-.5);
+  var rightItems=PAAR_PAIRS.map((p,i)=>({text:p.de,idx:i,side:'de'})).sort(()=>Math.random()-.5);
+  var html='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+  html+='<div style="display:flex;flex-direction:column;gap:8px">';
+  leftItems.forEach(function(item){
+    html+='<div class="p-item fa-item" id="pfa-'+item.idx+'" data-idx="'+item.idx+'" data-side="fa" onclick="selectPaar(this)">'+item.text+'</div>';
+  });
+  html+='</div><div style="display:flex;flex-direction:column;gap:8px">';
+  rightItems.forEach(function(item){
+    html+='<div class="p-item" id="pde-'+item.idx+'" data-idx="'+item.idx+'" data-side="de" onclick="selectPaar(this)">'+item.text+'</div>';
+  });
+  html+='</div></div>';
+  document.getElementById('paar-section').innerHTML=html;
+  document.getElementById('paar-total').textContent=PAAR_PAIRS.length;
+  document.getElementById('paar-done').textContent='0';
+  paarSel=null; paarMatched=0;
+  showScreen('paar');
+}
+
+function selectPaar(el){
+  if(el.classList.contains('mat')) return;
+  if(!paarSel){
+    el.classList.add('sel'); paarSel=el;
+  } else if(paarSel===el){
+    el.classList.remove('sel'); paarSel=null;
+  } else if(paarSel.dataset.side===el.dataset.side){
+    paarSel.classList.remove('sel'); paarSel=el; el.classList.add('sel');
+  } else {
+    if(paarSel.dataset.idx===el.dataset.idx){
+      paarSel.classList.remove('sel'); paarSel.classList.add('mat');
+      el.classList.add('mat'); paarSel=null; paarMatched++;
+      document.getElementById('paar-done').textContent=paarMatched;
+      if(paarMatched>=PAAR_PAIRS.length) document.getElementById('paar-submit').disabled=false;
+    } else {
+      paarSel.classList.add('err'); el.classList.add('err');
+      var s=paarSel; paarSel=null;
+      setTimeout(function(){s.classList.remove('err','sel');el.classList.remove('err');},350);
+    }
+  }
+}
+
+function submitPaar(){
+  ref('answers/paar/'+MYNAME).set({score:paarMatched,total:PAAR_PAIRS.length});
+  addPoints(paarMatched*2);
+  showScreen('result');
+  document.getElementById('result-score').textContent=MYPOINTS;
+  document.getElementById('result-emoji').textContent=MYPOINTS>=30?'🏆':MYPOINTS>=20?'🎉':'😊';
+  document.getElementById('result-breakdown').innerHTML='<div class="score-row"><span>Gesamt</span><span style="color:var(--teal2);font-weight:800">'+MYPOINTS+' Punkte</span></div>';
+}
+
+function revealPaarAnswers(){
+  PAAR_PAIRS.forEach(function(p,i){
+    var fa=document.getElementById('pfa-'+i);
+    var de=document.getElementById('pde-'+i);
+    if(fa&&!fa.classList.contains('mat')) fa.style.borderColor='var(--green)';
+    if(de&&!de.classList.contains('mat')) de.style.borderColor='var(--green)';
+  });
+}
+</script>
+</div>
+
+<script>
+const FB_CFG={
+  apiKey:'AIzaSyCFAW03ZlsoGeXvEoigSBcgVbqRC6oVk80',
+  authDomain:'lern-farsi-arash.firebaseapp.com',
+  databaseURL:'https://lern-farsi-arash-default-rtdb.firebaseio.com',
+  projectId:'lern-farsi-arash',
+};
+firebase.initializeApp(FB_CFG);
+const db=firebase.database();
+
+// ── ROUTER ──
+function startMode(mode){
+  document.getElementById('router-screen').style.display='none';
+  if(mode==='lehrer'){
+    document.getElementById('lehrer-app').style.display='block';
+    initLehrer();
+  } else {
+    document.getElementById('schueler-app').style.display='block';
+    // schueler app inits itself via join screen
+  }
+  history.replaceState(null,'','?mode='+mode);
+}
+
+// Auto-detect from URL
+(function(){
+  var p=new URLSearchParams(location.search).get('mode');
+  if(p==='lehrer'||p==='schueler') startMode(p);
+})();
+
+// ══ LEHRER JS ══════════════════════════════════════════
+
+// ── FIREBASE ──
+const SESSION = 'pruef_' + Date.now().toString(36).slice(-4);
+const ref = (p) => db.ref('pruefung/' + SESSION + '/' + p);
+
+// ── TIMER ──
+var timerSec = 90*60, timerRunning = false, timerInterval;
+function toggleTimer(){
+  if(timerRunning){ clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').textContent='▶ Start'; }
+  else { timerInterval=setInterval(tickTimer,1000); timerRunning=true; document.getElementById('timer-btn').textContent='⏸ Pause'; }
+}
+function tickTimer(){
+  if(timerSec<=0){clearInterval(timerInterval);return;}
+  timerSec--;
+  var m=Math.floor(timerSec/60), s=timerSec%60;
+  document.getElementById('timer').textContent=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+  if(timerSec===0) document.getElementById('timer').style.color='var(--rose)';
+}
+
+// ── PHASES ──
+var currentPhase=0;
+function goPhase(n){
+  document.querySelectorAll('.phase-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('phase-'+n).classList.add('active');
+  document.querySelectorAll('.phase-btn').forEach((b,i)=>{
+    b.classList.remove('active','done');
+    if(i===n) b.classList.add('active');
+    else if(i<n) b.classList.add('done');
+  });
+  currentPhase=n;
+  if(n===9) loadScores();
+}
+
+// ── TOOLTIP ──
+document.querySelectorAll('.word').forEach(function(w){
+  w.addEventListener('mouseenter',function(e){
+    var t=document.getElementById('tooltip');
+    t.textContent=w.dataset.tr;
+    t.style.display='block';
+    t.style.left=(e.clientX+12)+'px';
+    t.style.top=(e.clientY-30)+'px';
+  });
+  w.addEventListener('mousemove',function(e){
+    var t=document.getElementById('tooltip');
+    t.style.left=(e.clientX+12)+'px';
+    t.style.top=(e.clientY-30)+'px';
+  });
+  w.addEventListener('mouseleave',function(){
+    document.getElementById('tooltip').style.display='none';
+  });
+});
+
+// ── TASK DATA ──
+var TASKS = {
+  t1mc: {
+    type: 'mc',
+    questions: [
+      {q:'Wie fährt Danial zur Universität?', opts:['با ماشین','با اتوبوس','با مترو','پیاده'], ans:1},
+      {q:'Was macht Danial in der Bibliothek?', opts:['موسیقی گوش می‌دهد','با دوستان صحبت می‌کند','درس می‌خواند','کتاب می‌خرد'], ans:2},
+      {q:'Richtig oder Falsch: Danial spielt abends Fußball.', opts:['Richtig','Falsch'], ans:1},
+      {q:'Richtig oder Falsch: Danial liebt Sport.', opts:['Richtig','Falsch'], ans:0},
+      {q:'Was denkt Danial über sein Leben?', opts:['Es ist schwer','Es ist einfach aber angenehm','Es ist langweilig','Es ist perfekt'], ans:1},
+    ]
+  },
+  t3q: {
+    type: 'mixed',
+    questions: [
+      {q:'Wohin will Niloufar nach dem Studium?', opts:['به فرانسه','به انگلستان','به آلمان','به ایتالیا'], ans:2},
+      {q:'Warum hat Niloufar Deutsch gelernt?', opts:['Für die Universität','Um auszuwandern','Aus Interesse','Weil es einfach ist'], ans:1},
+      {q:'Richtig oder Falsch: Niloufar will mit Freunden reisen.', opts:['Richtig','Falsch'], ans:1},
+      {q:'Welches Ziel hat Niloufar nach dem Auslandsstudium?', opts:['In Deutschland bleiben','Nach Iran zurückkehren','Andere Länder besuchen','Promovieren'], ans:1},
+      {q:'Freie Antwort: Was würden Sie an Niloufars Stelle machen?', type:'free'},
+    ]
+  }
+};
+
+var currentTask = null;
+var taskAnswers = {}; // {name: {q0:x, q1:x, ...}}
+var taskListeners = {};
+
+function startTask(taskId){
+  currentTask = taskId;
+  taskAnswers = {};
+  ref('task').set({id:taskId, active:true, ts:Date.now()});
+  // Listen for answers
+  if(taskListeners[taskId]) ref('answers/'+taskId).off();
+  taskListeners[taskId] = ref('answers/'+taskId).on('value', snap=>{
+    taskAnswers = snap.val() || {};
+    updateTaskResults(taskId);
+  });
+}
+
+function updateTaskResults(taskId){
+  var task = TASKS[taskId];
+  if(!task) return;
+  var el = document.getElementById(taskId==='t1mc'?'t1-results':'t3-results');
+  var liveEl = document.getElementById(taskId==='t1mc'?'t1-live-answers':'t3-free-answers');
+  if(!el) return;
+
+  var students = Object.keys(taskAnswers);
+  var nQ = task.questions.length;
+  var html = '';
+  task.questions.forEach(function(q,qi){
+    if(q.type==='free') return;
+    // Count votes per option
+    var counts = new Array(q.opts.length).fill(0);
+    var total = 0;
+    students.forEach(function(s){
+      var ans = taskAnswers[s];
+      if(ans && ans['q'+qi] !== undefined){
+        counts[ans['q'+qi]]++;
+        total++;
+      }
+    });
+    html += '<div style="margin-bottom:1rem">';
+    html += '<div style="font-size:.82rem;font-weight:700;margin-bottom:.4rem;color:var(--text)">'+(qi+1)+'. '+q.q+'</div>';
+    q.opts.forEach(function(o,oi){
+      var pct = total>0?Math.round(counts[oi]/total*100):0;
+      var isCorrect = oi===q.ans;
+      var barColor = isCorrect?'var(--green)':'var(--teal)';
+      html += '<div class="opt-bar">';
+      html += '<div class="opt-label fa">'+o+'</div>';
+      html += '<div style="flex:1;background:var(--card2);border-radius:6px;overflow:hidden;height:24px">';
+      html += '<div style="height:100%;background:'+barColor+';width:'+pct+'%;transition:width .6s;display:flex;align-items:center;padding:0 6px;font-size:.75rem;font-weight:800;color:white;min-width:'+(pct>0?'32px':'0')+'">'+(pct>0?pct+'%':'')+'</div>';
+      html += '</div>';
+      html += '<div class="opt-count">'+counts[oi]+'</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  });
+  el.innerHTML = html || '<div style="color:var(--text3);font-size:.85rem;text-align:center;padding:2rem">Warte auf Antworten...</div>';
+
+  // Stats
+  var correct=0, answered=0;
+  students.forEach(function(s){
+    var ans = taskAnswers[s];
+    if(!ans) return;
+    task.questions.forEach(function(q,qi){
+      if(q.type==='free') return;
+      if(ans['q'+qi]!==undefined){
+        answered++;
+        if(ans['q'+qi]===q.ans) correct++;
+      }
+    });
+  });
+  var nNonFree = task.questions.filter(q=>q.type!=='free').length;
+  var nAnswered = students.filter(s=>taskAnswers[s]).length;
+  if(document.getElementById('t1-answered')) document.getElementById('t1-answered').textContent=nAnswered;
+  if(document.getElementById('t1-correct')) document.getElementById('t1-correct').textContent=correct;
+  if(document.getElementById('t1-pct')) document.getElementById('t1-pct').textContent=(answered>0?Math.round(correct/answered*100):0)+'%';
+
+  // Free answers
+  if(liveEl){
+    var freeHtml='';
+    students.forEach(function(s){
+      var ans=taskAnswers[s];
+      if(ans&&ans.free){
+        freeHtml+='<div class="answer-item"><span class="answer-name">'+s+'</span><span class="answer-text">'+ans.free+'</span></div>';
+      }
+    });
+    liveEl.innerHTML=freeHtml||'<div style="color:var(--text3);font-size:.85rem">Keine freien Antworten bisher.</div>';
+  }
+}
+
+function revealAnswers(taskId){
+  ref('reveal/'+taskId).set(true);
+}
+
+// ── LÜCKENTEXT ──
+function revealBlanks(){
+  document.querySelectorAll('.blank').forEach(function(b){
+    b.textContent=b.dataset.answer;
+    b.classList.add('revealed');
+  });
+  ref('reveal/t2lc').set(true);
+}
+
+// ── DIALOG ──
+var DIALOG_CORRECT = [0,1,2,3,4]; // B[i] matches A[i]
+function revealDialog(){
+  document.querySelectorAll('.dialog-item[id^="da-"]').forEach(function(el,i){
+    el.classList.add('matched');
+  });
+  document.querySelectorAll('.dialog-item[id^="db-"]').forEach(function(el,i){
+    el.classList.add('matched');
+  });
+  ref('reveal/dialog').set(true);
+}
+
+// Watch dialog answers
+ref('answers/dialog').on('value', function(snap){
+  var ans = snap.val()||{};
+  var el = document.getElementById('dialog-results');
+  if(!el) return;
+  var html='';
+  Object.keys(ans).forEach(function(name){
+    var a=ans[name];
+    html+='<div class="answer-item"><span class="answer-name">'+name+'</span><span class="answer-text">'+JSON.stringify(a)+'</span></div>';
+  });
+  el.innerHTML=html;
+});
+
+// ── PAARBILDUNG ──
+var PAAR_DATA = [
+  {fa:'رفتن',de:'gehen / fahren'},
+  {fa:'بودن',de:'sein'},
+  {fa:'داشتن',de:'haben'},
+  {fa:'خواندن',de:'lesen / studieren'},
+  {fa:'گفتن',de:'sagen'},
+  {fa:'دیدن',de:'sehen'},
+  {fa:'خوردن',de:'essen'},
+  {fa:'آمدن',de:'kommen'},
+  {fa:'بزرگ‌تر',de:'größer'},
+  {fa:'بهترین',de:'der/die/das Beste'},
+  {fa:'فردا',de:'morgen'},
+  {fa:'قبل از اینکه',de:'bevor / ehe'},
+];
+
+// Show on lehrer screen
+(function buildPaar(){
+  var el=document.getElementById('paar-lehrer');
+  if(!el) return;
+  var shuffled=PAAR_DATA.slice().sort(()=>Math.random()-.5);
+  var html='';
+  shuffled.forEach(function(p,i){
+    html+='<div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center">';
+    html+='<span style="font-family:Vazirmatn,sans-serif;font-size:1.05rem;direction:rtl">'+p.fa+'</span>';
+    html+='<span style="color:var(--text2);font-size:.85rem">'+p.de+'</span>';
+    html+='</div>';
+  });
+  el.innerHTML=html;
+})();
+
+function revealPaar(){
+  ref('reveal/paar').set(true);
+}
+
+ref('answers/paar').on('value', function(snap){
+  var ans=snap.val()||{};
+  var el=document.getElementById('paar-live');
+  if(!el) return;
+  var html='';
+  Object.keys(ans).forEach(function(name){
+    var a=ans[name];
+    var score=a.score||0;
+    html+='<div class="answer-item"><span class="answer-name">'+name+'</span><span class="answer-correct">'+score+' / '+PAAR_DATA.length+' richtig</span></div>';
+  });
+  el.innerHTML=html||'<div style="color:var(--text3);font-size:.85rem">Warte auf Antworten...</div>';
+});
+
+// ── STUDENTS ONLINE ──
+ref('students').on('value', function(snap){
+  var students=snap.val()||{};
+  var names=Object.keys(students).filter(k=>students[k]&&students[k].online);
+  document.getElementById('online-count').textContent=names.length+' online';
+  var el=document.getElementById('students-list');
+  if(!el) return;
+  if(names.length===0){
+    el.innerHTML='<div style="color:var(--text3);font-size:.85rem">Noch niemand verbunden...</div>';
+    return;
+  }
+  el.innerHTML=names.map(n=>'<div style="display:flex;align-items:center;gap:8px;padding:5px 8px;background:var(--card2);border-radius:7px"><span style="color:var(--green);font-size:.7rem">●</span><span style="font-size:.85rem">'+n+'</span></div>').join('');
+});
+
+// ── SCORES ──
+function loadScores(){
+  ref('scores').once('value').then(function(snap){
+    var scores=snap.val()||{};
+    var el=document.getElementById('score-grid');
+    var sorted=Object.keys(scores).sort((a,b)=>(scores[b].total||0)-(scores[a].total||0));
+    if(sorted.length===0){
+      el.innerHTML='<div style="color:var(--text3);font-size:.85rem;grid-column:1/-1;text-align:center;padding:2rem">Keine Daten</div>';
+      return;
+    }
+    var medals=['🥇','🥈','🥉'];
+    el.innerHTML=sorted.map((n,i)=>'<div class="score-card"><div class="score-name">'+(medals[i]||'')+(i+1)+'. '+n+'</div><div class="score-val">'+(scores[n].total||0)+'</div><div class="score-max">Punkte</div></div>').join('');
+    var total=sorted.reduce((s,n)=>s+(scores[n].total||0),0);
+    document.getElementById('final-stats').innerHTML=
+      '<div class="stat"><div class="stat-val">'+sorted.length+'</div><div class="stat-label">Teilnehmer</div></div>'+
+      '<div class="stat"><div class="stat-val">'+Math.round(total/sorted.length||0)+'</div><div class="stat-label">Ø Punkte</div></div>';
+  });
+}
+
+function exportResults(){
+  ref('scores').once('value').then(function(snap){
+    var d=snap.val()||{};
+    var csv='Name,Punkte\n'+Object.keys(d).sort((a,b)=>(d[b].total||0)-(d[a].total||0)).map(n=>n+','+(d[n].total||0)).join('\n');
+    var a=document.createElement('a');
+    a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+    a.download='pruefung_ergebnisse.csv';
+    a.click();
+  });
+}
+
+function resetAll(){
+  if(!confirm('Alle Daten löschen und neue Runde starten?')) return;
+  ref('').remove();
+  timerSec=90*60;
+  clearInterval(timerInterval);
+  timerRunning=false;
+  document.getElementById('timer').textContent='90:00';
+  document.getElementById('timer').style.color='var(--amber)';
+  document.getElementById('timer-btn').textContent='▶ Start';
+  goPhase(0);
+}
+
+// ── QR CODE (simple) ──
+function drawQR(){
+  var url = location.href.replace('lehrer','schueler').replace('pruefungsvorbereitung_lehrer','pruefungsvorbereitung_schueler')+'?session='+SESSION;
+  document.getElementById('student-url').textContent = url;
+  // Simple QR via external (no external dep version: just show URL)
+  var c=document.getElementById('qr-canvas');
+  var ctx=c.getContext('2d');
+  ctx.fillStyle='white';ctx.fillRect(0,0,180,180);
+  ctx.fillStyle='#0F2040';ctx.font='11px Nunito,sans-serif';ctx.textAlign='center';
+  ctx.fillText('Bitte URL eingeben:', 90, 40);
+  // Write session ID large
+  ctx.fillStyle='#0D9488';ctx.font='bold 22px Nunito,sans-serif';
+  ctx.fillText(SESSION, 90, 90);
+  ctx.fillStyle='#0F2040';ctx.font='10px Nunito,sans-serif';
+  ctx.fillText('Session-Code', 90, 120);
+}
+drawQR();
+
+// Write session to firebase
+ref('meta').set({started:Date.now(), session:SESSION});
+
+
+
+function initLehrer(){
+  drawQR();
+  ref('meta').set({started:Date.now(), session:SESSION});
+  ref('students').on('value', function(snap){
+    var students=snap.val()||{};
+    var names=Object.keys(students).filter(k=>students[k]&&students[k].online);
+    document.getElementById('online-count').textContent=names.length+' online';
+    var el=document.getElementById('students-list');
+    if(!el) return;
+    if(names.length===0){el.innerHTML='<div style="color:var(--text3);font-size:.85rem">Noch niemand verbunden...</div>';return;}
+    el.innerHTML=names.map(n=>'<div style="display:flex;align-items:center;gap:8px;padding:5px 8px;background:var(--card2);border-radius:7px"><span style="color:var(--green);font-size:.7rem">●</span><span style="font-size:.85rem">'+n+'</span></div>').join('');
+  });
+}
+// ══ SCHUELER JS ════════════════════════════════════════
+
+
+var SESSION='', MYNAME='', MYPOINTS=0;
+var SCORES={};
+var lueckSelected=null;
+var lueckFilled={};
+var paarSel=null, paarMatched=0;
+var PAAR_PAIRS=[];
+
+// ── URL param ──
+var urlParams=new URLSearchParams(location.search);
+if(urlParams.get('session')) document.getElementById('session-input').value=urlParams.get('session');
+
+function sref(p){return db.sref('pruefung/'+SESSION+'/'+p);}
+
+function joinSession(){
+  var sess=document.getElementById('session-input').value.trim();
+  var name=document.getElementById('name-input').value.trim();
+  if(!sess||!name){alert('Bitte Session-Code und Name eingeben.');return;}
+  SESSION=sess; MYNAME=name;
+  document.getElementById('join-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('app-name').textContent=name;
+  // Register online
+  var presRef=sref('students/'+name);
+  presRef.set({online:true,joined:Date.now()});
+  presRef.onDisconnect().set({online:false});
+  // Listen for task
+  sref('task').on('value',onTask);
+  // Listen for reveals
+  sref('reveal').on('value',onReveal);
+  showScreen('wait');
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+}
+
+function addPoints(n){
+  MYPOINTS+=n;
+  document.getElementById('points-badge').textContent=MYPOINTS+' Pkt';
+  sref('scores/'+MYNAME).set({total:MYPOINTS});
+}
+
+// ── TASK DISPATCH ──
+var lastTask=null;
+function onTask(snap){
+  var t=snap.val();
+  if(!t||!t.active) return;
+  if(t.id===lastTask) return;
+  lastTask=t.id;
+  if(t.id==='t1mc') buildMCScreen('t1mc','Aufgaben — Text 1');
+  else if(t.id==='t2lc') showScreen('lueck');
+  else if(t.id==='t2dialog') buildDialogScreen();
+  else if(t.id==='t3q') buildT3Screen();
+  else if(t.id==='paar') buildPaarScreen();
+}
+
+// ── REVEAL ──
+function onReveal(snap){
+  var r=snap.val()||{};
+  if(r.t1mc) revealMCAnswers('t1mc');
+  if(r.t2lc) revealLuecken();
+  if(r.dialog) revealDialogAnswers();
+  if(r.t3q) revealMCAnswers('t3q');
+  if(r.paar) revealPaarAnswers();
+}
+
+// ── MC ──
+var MC_TASKS={
+  t1mc:{
+    title:'Aufgaben — Text 1',
+    questions:[
+      {q:'Wie fährt Danial zur Universität?',opts:['با ماشین','با اتوبوس','با مترو','پیاده'],ans:1,fa:true},
+      {q:'Was macht Danial in der Bibliothek?',opts:['موسیقی گوش می‌دهد','با دوستان صحبت می‌کند','درس می‌خواند','کتاب می‌خرد'],ans:2,fa:true},
+      {q:'Richtig oder Falsch: Danial spielt abends Fußball.',opts:['Richtig ✓','Falsch ✗'],ans:1,fa:false},
+      {q:'Richtig oder Falsch: Danial liebt Sport.',opts:['Richtig ✓','Falsch ✗'],ans:0,fa:false},
+      {q:'Was denkt Danial über sein Leben?',opts:['Es ist schwer','Es ist einfach aber angenehm','Es ist langweilig','Es ist perfekt'],ans:1,fa:false},
+    ]
+  },
+  t3q:{
+    title:'Aufgaben — Text 3',
+    questions:[
+      {q:'Wohin will Niloufar nach dem Studium?',opts:['به فرانسه','به انگلستان','به آلمان','به ایتالیا'],ans:2,fa:true},
+      {q:'Richtig oder Falsch: Niloufar will mit Freunden reisen.',opts:['Richtig ✓','Falsch ✗'],ans:1,fa:false},
+      {q:'Welches Ziel hat Niloufar nach dem Ausland?',opts:['In Deutschland bleiben','Nach Iran zurückkehren','Andere Länder','Promovieren'],ans:1,fa:false},
+      {q:'Freie Antwort: Was würden Sie an Niloufars Stelle machen? (auf Persisch)',type:'free'},
+    ]
+  }
+};
+
+var mcAnswers={};
+function buildMCScreen(taskId, title){
+  var task=MC_TASKS[taskId];
+  if(!task) return;
+  document.getElementById('mc-task-title').textContent=task.title;
+  var html='';
+  task.questions.forEach(function(q,qi){
+    html+='<div class="question-card" id="qc'+qi+'">';
+    html+='<div class="question-text">'+(qi+1)+'. '+q.q+'</div>';
+    if(q.type==='free'){
+      html+='<textarea class="free-input" id="free-'+qi+'" placeholder="Schreib deine Antwort auf Persisch..."></textarea>';
+    } else {
+      html+='<div class="opts">';
+      q.opts.forEach(function(o,oi){
+        var cls=q.fa?'opt':'opt german';
+        html+='<div class="'+cls+'" id="opt-'+qi+'-'+oi+'" onclick="selectOpt('+qi+','+oi+',\''+taskId+'\')">'+o+'</div>';
+      });
+      html+='</div>';
+    }
+    html+='</div>';
+  });
+  document.getElementById('mc-questions').innerHTML=html;
+  document.getElementById('mc-submit').dataset.task=taskId;
+  mcAnswers={};
+  showScreen('mc');
+}
+
+function selectOpt(qi,oi,taskId){
+  var task=MC_TASKS[taskId];
+  if(!task) return;
+  var q=task.questions[qi];
+  if(q.type==='free') return;
+  // Deselect others
+  var nOpts=q.opts.length;
+  for(var i=0;i<nOpts;i++){
+    var el=document.getElementById('opt-'+qi+'-'+i);
+    if(el) el.classList.remove('sel');
+  }
+  var el=document.getElementById('opt-'+qi+'-'+oi);
+  if(el) el.classList.add('sel');
+  mcAnswers['q'+qi]=oi;
+}
+
+function submitMC(){
+  var taskId=document.getElementById('mc-submit').dataset.task||'t1mc';
+  var task=MC_TASKS[taskId];
+  // Add free answers
+  task.questions.forEach(function(q,qi){
+    if(q.type==='free'){
+      var el=document.getElementById('free-'+qi);
+      if(el) mcAnswers.free=el.value;
+    }
+  });
+  sref('answers/'+taskId+'/'+MYNAME).set(mcAnswers);
+  // Local feedback
+  var correct=0;
+  task.questions.forEach(function(q,qi){
+    if(q.type==='free') return;
+    var ans=mcAnswers['q'+qi];
+    if(ans===undefined) return;
+    var correct_opt=document.getElementById('opt-'+qi+'-'+q.ans);
+    var sel_opt=document.getElementById('opt-'+qi+'-'+ans);
+    if(correct_opt) correct_opt.classList.add('correct','disabled');
+    if(sel_opt&&ans!==q.ans) sel_opt.classList.add('wrong');
+    if(ans===q.ans) correct++;
+  });
+  document.getElementById('mc-submit').disabled=true;
+  addPoints(correct*2);
+  showScreen('wait');
+}
+
+function revealMCAnswers(taskId){
+  // Already handled locally in submitMC
+}
+
+// ── LÜCKENTEXT ──
+function selectWord(el){
+  document.querySelectorAll('.wb-word').forEach(w=>w.style.borderColor='');
+  lueckSelected=el.dataset.word;
+  el.style.borderColor='var(--amber)';
+}
+
+function fillBlank(i){
+  if(!lueckSelected) return;
+  var slot=document.getElementById('bs'+i);
+  if(slot.classList.contains('filled')) return;
+  // Remove from word bank
+  document.querySelectorAll('.wb-word').forEach(function(w){
+    if(w.dataset.word===lueckSelected) w.classList.add('used');
+  });
+  slot.textContent=lueckSelected;
+  slot.classList.add('filled');
+  lueckFilled[i]=lueckSelected;
+  lueckSelected=null;
+  document.querySelectorAll('.wb-word').forEach(w=>w.style.borderColor='');
+  // Check if all filled
+  if(Object.keys(lueckFilled).length>=4) document.getElementById('lueck-submit').disabled=false;
+}
+
+function submitLueck(){
+  sref('answers/t2lc/'+MYNAME).set(lueckFilled);
+  var correct=0;
+  for(var i=0;i<4;i++){
+    var slot=document.getElementById('bs'+i);
+    if(!slot) continue;
+    if(lueckFilled[i]===slot.dataset.answer){ slot.classList.add('correct'); correct++; }
+    else slot.classList.add('wrong');
+  }
+  document.getElementById('lueck-submit').disabled=true;
+  addPoints(correct*2);
+  showScreen('wait');
+}
+
+function revealLuecken(){
+  for(var i=0;i<4;i++){
+    var s=document.getElementById('bs'+i);
+    if(s&&!s.classList.contains('filled')){
+      s.textContent=s.dataset.answer;
+      s.classList.add('filled');
+    }
+  }
+}
+
+// ── DIALOG ──
+var DIALOG_A=[
+  'ببخشید، بلیط تهران کجا می‌فروشند؟',
+  'قطار ساعت چند حرکت می‌کند؟',
+  'آیا جای نشستن پیدا می‌شود؟',
+  'قیمت بلیط چقدر است؟',
+  'ممنون از کمکتان.',
+];
+var DIALOG_B=[
+  'گیشه شماره سه، سمت چپ.',
+  'ساعت ده و نیم.',
+  'بله، چند تا جای خالی مانده.',
+  'صد و پنجاه هزار تومان.',
+  'خواهش می‌کنم. سفر خوشی داشته باشید!',
+];
+var DIALOG_CORRECT=[0,1,2,3,4];
+var dialogAnswers={};
+
+function buildDialogScreen(){
+  var html='';
+  DIALOG_A.forEach(function(a,i){
+    html+='<div class="dial-a" style="margin-bottom:10px">';
+    html+='<span class="spk">A '+(i+1)+':</span>'+a;
+    html+='<div class="dial-b-opts">';
+    // Shuffle B options
+    var bIdx=[0,1,2,3,4].sort(()=>Math.random()-.5);
+    bIdx.forEach(function(j){
+      html+='<div class="dial-b-opt" id="db-'+i+'-'+j+'" onclick="selectDialogB('+i+','+j+')">'+DIALOG_B[j]+'</div>';
+    });
+    html+='</div></div>';
+  });
+  document.getElementById('dialog-questions').innerHTML=html;
+  dialogAnswers={};
+  showScreen('dialog');
+}
+
+function selectDialogB(qi,oi){
+  // Deselect previous for this qi
+  document.querySelectorAll('[id^="db-'+qi+'-"]').forEach(function(el){el.classList.remove('sel');});
+  document.getElementById('db-'+qi+'-'+oi).classList.add('sel');
+  dialogAnswers[qi]=oi;
+  if(Object.keys(dialogAnswers).length>=5) document.getElementById('dialog-submit').disabled=false;
+}
+
+function submitDialog(){
+  sref('answers/dialog/'+MYNAME).set(dialogAnswers);
+  var correct=0;
+  Object.keys(dialogAnswers).forEach(function(qi){
+    var oi=dialogAnswers[qi];
+    var el=document.getElementById('db-'+qi+'-'+oi);
+    if(oi===DIALOG_CORRECT[parseInt(qi)]){ if(el){el.classList.add('correct');} correct++; }
+    else if(el) el.classList.add('wrong');
+    // Show correct
+    var cel=document.getElementById('db-'+qi+'-'+DIALOG_CORRECT[parseInt(qi)]);
+    if(cel) cel.classList.add('correct');
+  });
+  document.getElementById('dialog-submit').disabled=true;
+  addPoints(correct*2);
+  showScreen('wait');
+}
+
+function revealDialogAnswers(){
+  DIALOG_CORRECT.forEach(function(j,i){
+    var el=document.getElementById('db-'+i+'-'+j);
+    if(el) el.classList.add('correct');
+  });
+}
+
+// ── T3 ──
+function buildT3Screen(){
+  var task=MC_TASKS['t3q'];
+  var html='';
+  task.questions.forEach(function(q,qi){
+    html+='<div class="question-card" id="t3qc'+qi+'">';
+    html+='<div class="question-text">'+(qi+1)+'. '+q.q+'</div>';
+    if(q.type==='free'){
+      html+='<textarea class="free-input" id="t3free-'+qi+'" placeholder="Schreib auf Persisch..."></textarea>';
+    } else {
+      html+='<div class="opts">';
+      q.opts.forEach(function(o,oi){
+        var cls=q.fa?'opt':'opt german';
+        html+='<div class="'+cls+'" id="t3opt-'+qi+'-'+oi+'" onclick="selectT3Opt('+qi+','+oi+')">'+o+'</div>';
+      });
+      html+='</div>';
+    }
+    html+='</div>';
+  });
+  document.getElementById('t3-questions').innerHTML=html;
+  mcAnswers={};
+  showScreen('t3');
+}
+
+function selectT3Opt(qi,oi){
+  var task=MC_TASKS['t3q'];
+  var q=task.questions[qi];
+  var nOpts=q.opts.length;
+  for(var i=0;i<nOpts;i++){
+    var el=document.getElementById('t3opt-'+qi+'-'+i);
+    if(el) el.classList.remove('sel');
+  }
+  var el=document.getElementById('t3opt-'+qi+'-'+oi);
+  if(el) el.classList.add('sel');
+  mcAnswers['q'+qi]=oi;
+}
+
+function submitT3(){
+  var task=MC_TASKS['t3q'];
+  task.questions.forEach(function(q,qi){
+    if(q.type==='free'){
+      var el=document.getElementById('t3free-'+qi);
+      if(el) mcAnswers.free=el.value;
+    }
+  });
+  sref('answers/t3q/'+MYNAME).set(mcAnswers);
+  var correct=0;
+  task.questions.forEach(function(q,qi){
+    if(q.type==='free') return;
+    var ans=mcAnswers['q'+qi];
+    if(ans===undefined) return;
+    var correct_opt=document.getElementById('t3opt-'+qi+'-'+q.ans);
+    var sel_opt=document.getElementById('t3opt-'+qi+'-'+ans);
+    if(correct_opt) correct_opt.classList.add('correct','disabled');
+    if(sel_opt&&ans!==q.ans) sel_opt.classList.add('wrong');
+    if(ans===q.ans) correct++;
+  });
+  document.getElementById('t3-submit').disabled=true;
+  addPoints(correct*2);
+  showScreen('wait');
+}
+
+// ── PAARBILDUNG ──
+var PAAR_DATA=[
+  {fa:'رفتن',de:'gehen / fahren'},
+  {fa:'بودن',de:'sein'},
+  {fa:'داشتن',de:'haben'},
+  {fa:'خواندن',de:'lesen / studieren'},
+  {fa:'گفتن',de:'sagen'},
+  {fa:'دیدن',de:'sehen'},
+  {fa:'خوردن',de:'essen'},
+  {fa:'آمدن',de:'kommen'},
+  {fa:'بزرگ‌تر',de:'größer'},
+  {fa:'بهترین',de:'der/die/das Beste'},
+  {fa:'فردا',de:'morgen'},
+  {fa:'خسته',de:'müde'},
+];
+
+function buildPaarScreen(){
+  PAAR_PAIRS=PAAR_DATA.slice(0,8); // 8 pairs
+  var leftItems=PAAR_PAIRS.map((p,i)=>({text:p.fa,idx:i,side:'fa'})).sort(()=>Math.random()-.5);
+  var rightItems=PAAR_PAIRS.map((p,i)=>({text:p.de,idx:i,side:'de'})).sort(()=>Math.random()-.5);
+  var html='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+  html+='<div style="display:flex;flex-direction:column;gap:8px">';
+  leftItems.forEach(function(item){
+    html+='<div class="p-item fa-item" id="pfa-'+item.idx+'" data-idx="'+item.idx+'" data-side="fa" onclick="selectPaar(this)">'+item.text+'</div>';
+  });
+  html+='</div><div style="display:flex;flex-direction:column;gap:8px">';
+  rightItems.forEach(function(item){
+    html+='<div class="p-item" id="pde-'+item.idx+'" data-idx="'+item.idx+'" data-side="de" onclick="selectPaar(this)">'+item.text+'</div>';
+  });
+  html+='</div></div>';
+  document.getElementById('paar-section').innerHTML=html;
+  document.getElementById('paar-total').textContent=PAAR_PAIRS.length;
+  document.getElementById('paar-done').textContent='0';
+  paarSel=null; paarMatched=0;
+  showScreen('paar');
+}
+
+function selectPaar(el){
+  if(el.classList.contains('mat')) return;
+  if(!paarSel){
+    el.classList.add('sel'); paarSel=el;
+  } else if(paarSel===el){
+    el.classList.remove('sel'); paarSel=null;
+  } else if(paarSel.dataset.side===el.dataset.side){
+    paarSel.classList.remove('sel'); paarSel=el; el.classList.add('sel');
+  } else {
+    if(paarSel.dataset.idx===el.dataset.idx){
+      paarSel.classList.remove('sel'); paarSel.classList.add('mat');
+      el.classList.add('mat'); paarSel=null; paarMatched++;
+      document.getElementById('paar-done').textContent=paarMatched;
+      if(paarMatched>=PAAR_PAIRS.length) document.getElementById('paar-submit').disabled=false;
+    } else {
+      paarSel.classList.add('err'); el.classList.add('err');
+      var s=paarSel; paarSel=null;
+      setTimeout(function(){s.classList.remove('err','sel');el.classList.remove('err');},350);
+    }
+  }
+}
+
+function submitPaar(){
+  sref('answers/paar/'+MYNAME).set({score:paarMatched,total:PAAR_PAIRS.length});
+  addPoints(paarMatched*2);
+  showScreen('result');
+  document.getElementById('result-score').textContent=MYPOINTS;
+  document.getElementById('result-emoji').textContent=MYPOINTS>=30?'🏆':MYPOINTS>=20?'🎉':'😊';
+  document.getElementById('result-breakdown').innerHTML='<div class="score-row"><span>Gesamt</span><span style="color:var(--teal2);font-weight:800">'+MYPOINTS+' Punkte</span></div>';
+}
+
+function revealPaarAnswers(){
+  PAAR_PAIRS.forEach(function(p,i){
+    var fa=document.getElementById('pfa-'+i);
+    var de=document.getElementById('pde-'+i);
+    if(fa&&!fa.classList.contains('mat')) fa.style.borderColor='var(--green)';
+    if(de&&!de.classList.contains('mat')) de.style.borderColor='var(--green)';
+  });
+}
+
+
+// ── INIT WRAPPER ──
+// Firebase is initialized once — guard against double init
+var _fbInited = false;
+function ensureFirebase(){
+  if(_fbInited) return;
+  _fbInited = true;
+}
+</script>
+</body>
+</html>
