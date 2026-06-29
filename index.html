@@ -82,7 +82,7 @@ var L_SESSION = '', L_timerSec = 5400, L_timerRunning = false, L_timerInt;
 function Lref(p){ return FDB.ref('pruefung/' + L_SESSION + '/' + p); }
 
 function loadLehrer() {
-  L_SESSION = 'live_' + (function(){var d=new Date();return d.getFullYear()+''+('0'+(d.getMonth()+1)).slice(-2)+''+('0'+d.getDate()).slice(-2)+'_'+('0'+d.getHours()).slice(-2);})();
+  L_SESSION = 'live_' + (function(){var d=new Date();return d.getFullYear()+''+('0'+(d.getMonth()+1)).slice(-2)+''+('0'+d.getDate()).slice(-2);})();
   var wrap = document.getElementById('lehrer-wrap');
   wrap.classList.remove('hide');
   wrap.innerHTML = L_buildHTML();
@@ -199,8 +199,9 @@ function L_buildHTML(){
     <div>
       <div class="L-card"><div class="L-ct">📱 Session-Code</div>
         <div class="L-sc-code" id="L-code">...</div>
-        <div style="font-size:.75rem;color:#94A3B8" id="L-url"></div>
-        <div style="font-size:.72rem;color:#64748B;margin-top:.3rem">Studis: gleiche URL → ?mode=schueler → Session-Code eingeben</div>
+        <div style="margin:.5rem 0;font-size:.75rem;color:#94A3B8">↓ Diesen Link an Studis schicken:</div>
+        <div id="L-url" style="background:#0F172A;border:1px solid #334155;border-radius:8px;padding:8px 10px;font-size:.76rem;word-break:break-all"></div>
+        <div style="font-size:.7rem;color:#64748B;margin-top:.4rem">Studis klicken den Link → tippen nur ihren Namen ein → fertig</div>
       </div>
       <div class="L-card"><div class="L-ct">👥 Online</div>
         <div id="L-stud" style="display:flex;flex-direction:column;gap:5px;max-height:180px;overflow-y:auto">
@@ -524,9 +525,12 @@ function loadSchueler(){
   var _qs = new URLSearchParams(location.search);
   var _sess = _qs.get('session');
   var _sessInp = document.getElementById('S-inp-sess');
-  if(_sess && _sessInp) { _sessInp.value = _sess; }
+  if(_sess && _sessInp) {
+    _sessInp.value = _sess;
+    _sessInp.style.display = 'none'; // hide if already known
+  }
   // Also auto-generate same date-based session
-  var _autoSess = 'live_' + (function(){var d=new Date();return d.getFullYear()+''+('0'+(d.getMonth()+1)).slice(-2)+''+('0'+d.getDate()).slice(-2)+'_'+('0'+d.getHours()).slice(-2);})();
+  var _autoSess = 'live_' + (function(){var d=new Date();return d.getFullYear()+''+('0'+(d.getMonth()+1)).slice(-2)+''+('0'+d.getDate()).slice(-2);})();
   if(_sessInp && !_sessInp.value) _sessInp.value = _autoSess;
 }
 
@@ -598,7 +602,7 @@ function S_buildHTML(){
     <div style="font-size:1.35rem;font-weight:900;background:linear-gradient(90deg,#14B8A6,#3B82F6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.3rem">Prüfungsvorbereitung</div>
     <div style="font-size:.82rem;color:#94A3B8;margin-bottom:2rem">Teilnehmer-App</div>
     <div style="width:100%;max-width:340px;display:flex;flex-direction:column;gap:11px">
-      <input id="S-inp-sess" style="padding:13px 15px;border:2px solid #334155;border-radius:12px;background:#1E293B;color:#F1F5F9;font-family:'Nunito',sans-serif;font-size:.93rem;width:100%;outline:none" placeholder="Session-Code (z.B. pv_ab12)" autocomplete="off">
+      <input id="S-inp-sess" style="padding:13px 15px;border:2px solid #334155;border-radius:12px;background:#1E293B;color:#F1F5F9;font-family:'Nunito',sans-serif;font-size:.93rem;width:100%;outline:none" placeholder="Session-Code" autocomplete="off">
       <input id="S-inp-name" style="padding:13px 15px;border:2px solid #334155;border-radius:12px;background:#1E293B;color:#F1F5F9;font-family:'Nunito',sans-serif;font-size:.93rem;width:100%;outline:none" placeholder="Dein Name" autocomplete="off">
       <button onclick="S_join()" style="padding:13px;border:none;border-radius:12px;background:linear-gradient(135deg,#0D9488,#3B82F6);color:white;font-family:'Nunito',sans-serif;font-size:.93rem;font-weight:800;cursor:pointer">Eintreten →</button>
     </div>
