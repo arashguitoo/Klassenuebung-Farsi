@@ -82,7 +82,7 @@ var L_SESSION = '', L_timerSec = 5400, L_timerRunning = false, L_timerInt;
 function Lref(p){ return FDB.ref('pruefung/' + L_SESSION + '/' + p); }
 
 function loadLehrer() {
-  L_SESSION = 'pv_' + Date.now().toString(36).slice(-4);
+  L_SESSION = 'live_' + (function(){var d=new Date();return d.getFullYear()+''+('0'+(d.getMonth()+1)).slice(-2)+''+('0'+d.getDate()).slice(-2)+'_'+('0'+d.getHours()).slice(-2);})();
   var wrap = document.getElementById('lehrer-wrap');
   wrap.classList.remove('hide');
   wrap.innerHTML = L_buildHTML();
@@ -351,7 +351,8 @@ function L_buildHTML(){
 
 function L_initListeners(){
   document.getElementById('L-code').textContent = L_SESSION;
-  document.getElementById('L-url').textContent = location.origin + location.pathname + '?mode=schueler  →  Session: ' + L_SESSION;
+  var studentURL = location.origin + location.pathname + '?mode=schueler&session=' + L_SESSION;
+  document.getElementById('L-url').innerHTML = '<a href="' + studentURL + '" target="_blank" style="color:#14B8A6;word-break:break-all;font-size:.8rem">' + studentURL + '</a>';
   // Build paar display
   var pd = document.getElementById('L-paar-disp');
   if(pd) pd.innerHTML = L_PAAR.map(p=>'<div style="background:#273548;border:1px solid #334155;border-radius:9px;padding:9px 12px;display:flex;justify-content:space-between"><span style="font-family:Vazirmatn,sans-serif;font-size:1rem;direction:rtl">'+p.fa+'</span><span style="color:#94A3B8;font-size:.82rem">'+p.de+'</span></div>').join('');
@@ -519,6 +520,14 @@ function loadSchueler(){
   var wrap=document.getElementById('schueler-wrap');
   wrap.classList.remove('hide');
   wrap.innerHTML=S_buildHTML();
+  // Pre-fill session from URL if present
+  var _qs = new URLSearchParams(location.search);
+  var _sess = _qs.get('session');
+  var _sessInp = document.getElementById('S-inp-sess');
+  if(_sess && _sessInp) { _sessInp.value = _sess; }
+  // Also auto-generate same date-based session
+  var _autoSess = 'live_' + (function(){var d=new Date();return d.getFullYear()+''+('0'+(d.getMonth()+1)).slice(-2)+''+('0'+d.getDate()).slice(-2)+'_'+('0'+d.getHours()).slice(-2);})();
+  if(_sessInp && !_sessInp.value) _sessInp.value = _autoSess;
 }
 
 function S_buildHTML(){
@@ -651,10 +660,14 @@ var S_PAAR=[{fa:'رفتن',de:'gehen'},{fa:'بودن',de:'sein'},{fa:'داشتن
 function S_scr(id){document.querySelectorAll('.S-scr').forEach(s=>s.classList.remove('on'));document.getElementById('S-'+id).classList.add('on');}
 function S_addPts(n){S_pts+=n;document.getElementById('S-pts-disp').textContent=S_pts+' Pkt';Sref('scores/'+S_name).set({total:S_pts});}
 function S_join(){
-  var sess=document.getElementById('S-inp-sess').value.trim();
+  var urlSess = new URLSearchParams(location.search).get('session');
+  var sess = urlSess || document.getElementById('S-inp-sess').value.trim();
   var name=document.getElementById('S-inp-name').value.trim();
   if(!sess||!name){alert('Bitte Session-Code und Name eingeben.');return;}
   S_sess=sess;S_name=name;
+  // pre-fill session from URL
+  var _urlSess = new URLSearchParams(location.search).get('session');
+  if(_urlSess) { var si = document.getElementById('S-inp-sess'); if(si) si.value = _urlSess; }
   document.getElementById('S-join').style.display='none';
   document.getElementById('S-main').style.display='block';
   document.getElementById('S-uname').textContent=name;
@@ -851,7 +864,8 @@ var _origJoin=S_join;
 // Simpler: patch the task listener after join
 var _S_join_orig = S_join;
 S_join = function(){
-  var sess=document.getElementById('S-inp-sess').value.trim();
+  var urlSess = new URLSearchParams(location.search).get('session');
+  var sess = urlSess || document.getElementById('S-inp-sess').value.trim();
   var name=document.getElementById('S-inp-name').value.trim();
   if(!sess||!name){alert('Bitte Session-Code und Name eingeben.');return;}
   S_sess=sess;S_name=name;
